@@ -1,4 +1,4 @@
-package io.github.edadma._sn_template
+import io.github.edadma.libcairo._
 
 object Main extends App {
 
