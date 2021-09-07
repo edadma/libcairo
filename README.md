@@ -9,7 +9,7 @@ Overview
 --------
 
 The goal of this project is to provide an easy-to-use Scala Native facade for the entire Cairo 2D graphics library.
-Currently, many of the basic functions needed to do graphcs, and to read and write PNGs are covered. The remainder of
+Currently, many of the basic functions needed to do graphics, and to read and write PNGs are covered. The remainder of
 the library will be steadily worked on.
 
 The more "programmer friendly" part of this library is found in the `io.github.edadma.libcairo` package. That's the only
