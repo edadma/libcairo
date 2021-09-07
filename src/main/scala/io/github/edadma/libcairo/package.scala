@@ -17,7 +17,16 @@ package object libcairo {
     def destroy(): Unit  = lib.cairo_destroy(cr)
     def cairo_set_source_rgb(red: Double, green: Double, blue: Double): Unit =
       lib.cairo_set_source_rgb(cr, red, green, blue)
+    def set_line_width(width: Double): Unit = lib.cairo_set_line_width(cr, width)
+    def move_to(x: Double, y: Double): Unit = lib.cairo_move_to(cr, x, y)
+    def rectangle(x: CDouble, y: CDouble, width: CDouble, height: CDouble): Unit =
+      lib.cairo_rectangle(cr, x, y, width, height)
+    def stroke(): Unit = lib.cairo_stroke(cr)
+    def fill(): Unit   = lib.cairo_fill(cr)
   }
+
+  def image_surface_create(format: Format, width: Int, height: Int): Surface =
+    lib.cairo_image_surface_create(format.value, width, height)
 
   def image_surface_create_from_png(filename: String): Surface =
     Zone(implicit z => lib.cairo_image_surface_create_from_png(toCString(filename))) //2577
