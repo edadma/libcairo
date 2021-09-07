@@ -59,7 +59,7 @@ their [tutorial](https://www.cairographics.org/tutorial/#L1drawing).
 
 ### Example 1
 
-This example creates a PNG image called `image1.png` containing the following image:
+This example creates a PNG file called `image1.png` containing the following image:
 
 ![image1](https://raw.githubusercontent.com/edadma/libcairo/main/image1.png)
 
@@ -104,7 +104,7 @@ object Main extends App {
 
 ### Example 2
 
-This example creates a PNG image called `image2.png` containing the following image:
+This example creates a PNG file called `image2.png` containing the following image:
 
 ![image2](https://raw.githubusercontent.com/edadma/libcairo/main/image2.png)
 
