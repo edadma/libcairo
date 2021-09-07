@@ -1,42 +1,61 @@
 package io.github.edadma
 
 import scala.scalanative.unsafe._
-import scala.scalanative.libc.stdlib._
 
 import io.github.edadma.libcairo.extern.{LibCairo => lib}
 
 package object libcairo {
 
   implicit class Surface private[libcairo] (val surface: lib.cairo_surface_tp) {
-    def create: Cairo   = lib.cairo_create(surface)
+    def create: Context = lib.cairo_create(surface)
+
     def destroy(): Unit = lib.cairo_surface_destroy(surface)
+
     def write_to_png(filename: String): lib.cairo_status_t =
       Zone(implicit z => lib.cairo_surface_write_to_png(surface, toCString(filename)))
   }
 
-  implicit class Cairo private[libcairo] (val cr: lib.cairo_tp) {
-    def reference: Cairo                  = lib.cairo_reference(cr)
-    def destroy(): Unit                   = lib.cairo_destroy(cr)
+  implicit class Context private[libcairo] (val cr: lib.cairo_tp) {
+    def reference: Context = lib.cairo_reference(cr)
+
+    def destroy(): Unit = lib.cairo_destroy(cr)
+
     def set_source(source: Pattern): Unit = lib.cairo_set_source(cr, source.pattern)
+
     def set_source_rgb(red: Double, green: Double, blue: Double): Unit =
       lib.cairo_set_source_rgb(cr, red, green, blue)
+
     def set_source_rgba(red: Double, green: Double, blue: Double, alpha: Double): Unit =
       lib.cairo_set_source_rgba(cr, red, green, blue, alpha)
+
     def set_line_width(width: Double): Unit = lib.cairo_set_line_width(cr, width)
+
     def scale(sx: Double, sy: Double): Unit = lib.cairo_scale(cr, sx, sy)
+
     def move_to(x: Double, y: Double): Unit = lib.cairo_move_to(cr, x, y)
+
     def line_to(x: Double, y: Double): Unit = lib.cairo_line_to(cr, x, y)
+
     def rectangle(x: CDouble, y: CDouble, width: CDouble, height: CDouble): Unit =
       lib.cairo_rectangle(cr, x, y, width, height)
-    def paint(): Unit                         = lib.cairo_paint(cr)
+
+    def paint(): Unit = lib.cairo_paint(cr)
+
     def paint_with_alpha(alpha: Double): Unit = lib.cairo_paint_with_alpha(cr, alpha)
-    def mask(source: Pattern): Unit           = lib.cairo_mask(cr, source.pattern)
-    def stroke(): Unit                        = lib.cairo_stroke(cr)
-    def fill(): Unit                          = lib.cairo_fill(cr)
+
+    def mask(source: Pattern): Unit = lib.cairo_mask(cr, source.pattern)
+
+    def stroke(): Unit = lib.cairo_stroke(cr)
+
+    def fill(): Unit = lib.cairo_fill(cr)
+
     def select_font_face(family: String, slant: FontSlant, weight: FontWeight): Unit =
       Zone(implicit z => lib.cairo_select_font_face(cr, toCString(family), slant.value, weight.value))
+
     def set_font_size(size: Double): Unit = lib.cairo_set_font_size(cr, size)
-    def show_text(utf8: String): Unit     = Zone(implicit z => lib.cairo_show_text(cr, toCString(utf8)))
+
+    def show_text(utf8: String): Unit = Zone(implicit z => lib.cairo_show_text(cr, toCString(utf8)))
+
     def text_extents(utf8: String): Extents = Zone { implicit z =>
       val extents: ExtentsOps = stackalloc[lib.cairo_text_extents_t]
 
@@ -47,10 +66,15 @@ package object libcairo {
 
   implicit class ExtentsOps(val ptr: lib.cairo_text_extents_tp) extends AnyVal {
     def x_bearing: Double = ptr._1
+
     def y_bearing: Double = ptr._2
-    def width: Double     = ptr._3
-    def height: Double    = ptr._4
+
+    def width: Double = ptr._3
+
+    def height: Double = ptr._4
+
     def x_advance: Double = ptr._5
+
     def y_advance: Double = ptr._6
   }
 
@@ -64,6 +88,7 @@ package object libcairo {
   implicit class Pattern private[libcairo] (val pattern: lib.cairo_pattern_tp) extends AnyVal {
     def add_color_stop_rgb(offset: CDouble, red: CDouble, green: CDouble, blue: CDouble): Unit =
       lib.cairo_pattern_add_color_stop_rgb(pattern, offset, red, green, blue)
+
     def add_color_stop_rgba(offset: CDouble, red: CDouble, green: CDouble, blue: CDouble, alpha: CDouble): Unit =
       lib.cairo_pattern_add_color_stop_rgba(pattern, offset, red, green, blue, alpha)
   }
@@ -88,6 +113,7 @@ package object libcairo {
   // enums
 
   class Status(val value: CInt) extends AnyVal
+
   object Status {
     final val SUCCESS                   = new Status(0)
     final val NO_MEMORY                 = new Status(1)
@@ -136,6 +162,7 @@ package object libcairo {
   }
 
   class Content(val value: CInt) extends AnyVal
+
   object Content {
     final val COLOR       = new Content(0x1000)
     final val ALPHA       = new Content(0x2000)
@@ -143,6 +170,7 @@ package object libcairo {
   }
 
   class Format(val value: CInt) extends AnyVal
+
   object Format {
     final val INVALID   = new Format(-1)
     final val ARGB32    = new Format(0)
@@ -154,6 +182,7 @@ package object libcairo {
   }
 
   class Operator(val value: CInt) extends AnyVal
+
   object Operator {
     final val CLEAR          = new Operator(0)
     final val SOURCE         = new Operator(1)
@@ -187,6 +216,7 @@ package object libcairo {
   }
 
   class Antialias(val value: CInt) extends AnyVal
+
   object Antialias {
     final val DEFAULT  = new Antialias(0)
     final val NONE     = new Antialias(1)
@@ -198,12 +228,14 @@ package object libcairo {
   }
 
   class FillRule(val value: CInt) extends AnyVal
+
   object FillRule {
     final val WINDING  = new FillRule(0)
     final val EVEN_ODD = new FillRule(1)
   }
 
   class LineCap(val value: CInt) extends AnyVal
+
   object LineCap {
     final val BUTT   = new LineCap(0)
     final val ROUND  = new LineCap(1)
@@ -211,6 +243,7 @@ package object libcairo {
   }
 
   class LineJoin(val value: CInt) extends AnyVal
+
   object LineJoin {
     final val MITER = new LineJoin(0)
     final val ROUND = new LineJoin(1)
@@ -218,11 +251,13 @@ package object libcairo {
   }
 
   class TextClusterFlags(val value: CInt) extends AnyVal
+
   object TextClusterFlags {
     final val BACKWARD = new TextClusterFlags(0x1)
   }
 
   class FontSlant(val value: CInt) extends AnyVal
+
   object FontSlant {
     final val NORMAL  = new FontSlant(0)
     final val ITALIC  = new FontSlant(1)
@@ -230,12 +265,14 @@ package object libcairo {
   }
 
   class FontWeight(val value: CInt) extends AnyVal
+
   object FontWeight {
     final val NORMAL = new FontWeight(0)
     final val BOLD   = new FontWeight(1)
   }
 
   class SubpixelOrder(val value: CInt) extends AnyVal
+
   object SubpixelOrder {
     final val DEFAULT = new SubpixelOrder(0)
     final val RGB     = new SubpixelOrder(1)
@@ -245,6 +282,7 @@ package object libcairo {
   }
 
   class HintStyle(val value: CInt) extends AnyVal
+
   object HintStyle {
     final val DEFAULT = new HintStyle(0)
     final val NONE    = new HintStyle(1)
@@ -254,6 +292,7 @@ package object libcairo {
   }
 
   class HintMetrics(val value: CInt) extends AnyVal
+
   object HintMetrics {
     final val DEFAULT = new HintMetrics(0)
     final val OFF     = new HintMetrics(1)
@@ -261,6 +300,7 @@ package object libcairo {
   }
 
   class FontType(val value: CInt) extends AnyVal
+
   object FontType {
     final val TOY    = new FontType(0)
     final val FT     = new FontType(1)
@@ -270,6 +310,7 @@ package object libcairo {
   }
 
   class PathDataType(val value: CInt) extends AnyVal
+
   object PathDataType {
     final val MOVE_TO    = new PathDataType(0)
     final val LINE_TO    = new PathDataType(1)
@@ -278,6 +319,7 @@ package object libcairo {
   }
 
   class DeviceType(val value: CInt) extends AnyVal
+
   object DeviceType {
     final val DRM     = new DeviceType(0)
     final val GL      = new DeviceType(1)
@@ -291,12 +333,14 @@ package object libcairo {
   }
 
   class SurfaceObserverMode(val value: CInt) extends AnyVal
+
   object SurfaceObserverMode {
     final val NORMAL            = new SurfaceObserverMode(0)
     final val RECORD_OPERATIONS = new SurfaceObserverMode(0x1)
   }
 
   class SurfaceType(val value: CInt) extends AnyVal
+
   object SurfaceType {
     final val IMAGE          = new SurfaceType(0)
     final val PDF            = new SurfaceType(1)
@@ -326,6 +370,7 @@ package object libcairo {
   }
 
   class PatternType(val value: CInt) extends AnyVal
+
   object PatternType {
     final val SOLID         = new PatternType(0)
     final val SURFACE       = new PatternType(1)
@@ -336,6 +381,7 @@ package object libcairo {
   }
 
   class Extend(val value: CInt) extends AnyVal
+
   object Extend {
     final val NONE    = new Extend(0)
     final val REPEAT  = new Extend(1)
@@ -344,6 +390,7 @@ package object libcairo {
   }
 
   class Filter(val value: CInt) extends AnyVal
+
   object Filter {
     final val FAST     = new Filter(0)
     final val GOOD     = new Filter(1)
@@ -354,6 +401,7 @@ package object libcairo {
   }
 
   class RegionOverlap(val value: CInt) extends AnyVal
+
   object RegionOverlap {
     final val IN   = new RegionOverlap(0)
     final val OUT  = new RegionOverlap(1)
