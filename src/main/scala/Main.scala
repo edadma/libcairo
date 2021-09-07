@@ -27,7 +27,7 @@ object Main extends App {
   cr.set_source_rgba(0, 0, 1, 0.40)
   cr.fill()
 
-  surface.write_to_png("../image.png")
+  surface.write_to_png("image.png")
 
   cr.destroy()
   surface.destroy()
