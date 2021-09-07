@@ -8,19 +8,24 @@ import io.github.edadma.libcairo.extern.{LibCairo => lib}
 package object libcairo {
 
   implicit class Surface private[libcairo] (val surface: lib.cairo_surface_tp) {
-    def cairo_create: Cairo = lib.cairo_create(surface)
+    def create: Cairo   = lib.cairo_create(surface)
+    def destroy(): Unit = lib.cairo_surface_destroy(surface)
     def write_to_png(filename: String): lib.cairo_status_t =
       Zone(implicit z => lib.cairo_surface_write_to_png(surface, toCString(filename)))
   }
 
   implicit class Cairo private[libcairo] (val cr: lib.cairo_tp) {
-    def reference: Cairo                        = lib.cairo_reference(cr)
-    def destroy(): Unit                         = lib.cairo_destroy(cr)
-    def cairo_set_source(source: Pattern): Unit = lib.cairo_set_source(cr, source.pattern)
-    def cairo_set_source_rgb(red: Double, green: Double, blue: Double): Unit =
+    def reference: Cairo                  = lib.cairo_reference(cr)
+    def destroy(): Unit                   = lib.cairo_destroy(cr)
+    def set_source(source: Pattern): Unit = lib.cairo_set_source(cr, source.pattern)
+    def set_source_rgb(red: Double, green: Double, blue: Double): Unit =
       lib.cairo_set_source_rgb(cr, red, green, blue)
+    def set_source_rgba(red: Double, green: Double, blue: Double, alpha: Double): Unit =
+      lib.cairo_set_source_rgba(cr, red, green, blue, alpha)
     def set_line_width(width: Double): Unit = lib.cairo_set_line_width(cr, width)
+    def scale(sx: Double, sy: Double): Unit = lib.cairo_scale(cr, sx, sy)
     def move_to(x: Double, y: Double): Unit = lib.cairo_move_to(cr, x, y)
+    def line_to(x: Double, y: Double): Unit = lib.cairo_line_to(cr, x, y)
     def rectangle(x: CDouble, y: CDouble, width: CDouble, height: CDouble): Unit =
       lib.cairo_rectangle(cr, x, y, width, height)
     def paint(): Unit                         = lib.cairo_paint(cr)
