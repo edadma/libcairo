@@ -59,8 +59,9 @@ their [tutorial](https://www.cairographics.org/tutorial/#L1drawing).
 
 ### Example 1
 
-This example creates a PNG image called `image1.png` containing the following
-image: ![image1](https://raw.githubusercontent.com/edadma/libcairo/main/image1.png)
+This example creates a PNG image called `image1.png` containing the following image:
+
+![image1](https://raw.githubusercontent.com/edadma/libcairo/main/image1.png)
 
 ```scala
 import io.github.edadma.libcairo._
@@ -103,8 +104,9 @@ object Main extends App {
 
 ### Example 2
 
-This example creates a PNG image called `image2.png` containing the following
-image: ![image2](https://raw.githubusercontent.com/edadma/libcairo/main/image2.png)
+This example creates a PNG image called `image2.png` containing the following image:
+
+![image2](https://raw.githubusercontent.com/edadma/libcairo/main/image2.png)
 
 ```scala
 import io.github.edadma.libcairo._
