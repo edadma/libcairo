@@ -154,4 +154,46 @@ package object libcairo {
     final val BOLD   = new FontWeight(1)
   }
 
+  class SubpixelOrder(val value: CInt) extends AnyVal
+  object SubpixelOrder {
+    final val DEFAULT = new SubpixelOrder(0)
+    final val RGB     = new SubpixelOrder(1)
+    final val BGR     = new SubpixelOrder(2)
+    final val VRGB    = new SubpixelOrder(3)
+    final val VBGR    = new SubpixelOrder(4)
+  }
+
+  class HintStyle(val value: CInt) extends AnyVal
+  object HintStyle {
+    final val DEFAULT = new HintStyle(0)
+    final val NONE    = new HintStyle(1)
+    final val SLIGHT  = new HintStyle(2)
+    final val MEDIUM  = new HintStyle(3)
+    final val FULL    = new HintStyle(4)
+  }
+
+  class HintMetrics(val value: CInt) extends AnyVal
+  object HintMetrics {
+    final val DEFAULT = new HintMetrics(0)
+    final val OFF     = new HintMetrics(1)
+    final val ON      = new HintMetrics(2)
+  }
+
+  class FontType(val value: CInt) extends AnyVal
+  object FontType {
+    final val TOY    = new FontType(0)
+    final val FT     = new FontType(1)
+    final val WIN32  = new FontType(2)
+    final val QUARTZ = new FontType(3)
+    final val USER   = new FontType(4)
+  }
+
+  class PathDataType(val value: CInt) extends AnyVal
+  object PathDataType {
+    final val MOVE_TO    = new PathDataType(0)
+    final val LINE_TO    = new PathDataType(1)
+    final val CURVE_TO   = new PathDataType(2)
+    final val CLOSE_PATH = new PathDataType(3)
+  }
+
 }
