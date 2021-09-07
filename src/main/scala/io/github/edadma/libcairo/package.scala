@@ -14,16 +14,19 @@ package object libcairo {
   }
 
   implicit class Cairo private[libcairo] (val cr: lib.cairo_tp) {
-    def reference: Cairo = lib.cairo_reference(cr)
-    def destroy(): Unit  = lib.cairo_destroy(cr)
+    def reference: Cairo                        = lib.cairo_reference(cr)
+    def destroy(): Unit                         = lib.cairo_destroy(cr)
+    def cairo_set_source(source: Pattern): Unit = lib.cairo_set_source(cr, source.pattern)
     def cairo_set_source_rgb(red: Double, green: Double, blue: Double): Unit =
       lib.cairo_set_source_rgb(cr, red, green, blue)
     def set_line_width(width: Double): Unit = lib.cairo_set_line_width(cr, width)
     def move_to(x: Double, y: Double): Unit = lib.cairo_move_to(cr, x, y)
     def rectangle(x: CDouble, y: CDouble, width: CDouble, height: CDouble): Unit =
       lib.cairo_rectangle(cr, x, y, width, height)
-    def stroke(): Unit = lib.cairo_stroke(cr)
-    def fill(): Unit   = lib.cairo_fill(cr)
+    def paint_with_alpha(alpha: Double): Unit = lib.cairo_paint_with_alpha(cr, alpha)
+    def mask(source: Pattern): Unit           = lib.cairo_mask(cr, source.pattern)
+    def stroke(): Unit                        = lib.cairo_stroke(cr)
+    def fill(): Unit                          = lib.cairo_fill(cr)
     def select_font_face(family: String, slant: FontSlant, weight: FontWeight): Unit =
       Zone(implicit z => lib.cairo_select_font_face(cr, toCString(family), slant.value, weight.value))
     def set_font_size(size: Double): Unit = lib.cairo_set_font_size(cr, size)
@@ -52,11 +55,29 @@ package object libcairo {
                      x_advance: Double,
                      y_advance: Double)
 
+  implicit class Pattern private[libcairo] (val pattern: lib.cairo_pattern_tp) extends AnyVal {
+    def add_color_stop_rgb(offset: CDouble, red: CDouble, green: CDouble, blue: CDouble): Unit =
+      lib.cairo_pattern_add_color_stop_rgb(pattern, offset, red, green, blue)
+    def add_color_stop_rgba(offset: CDouble, red: CDouble, green: CDouble, blue: CDouble, alpha: CDouble): Unit =
+      lib.cairo_pattern_add_color_stop_rgba(pattern, offset, red, green, blue, alpha)
+  }
+
   def image_surface_create(format: Format, width: Int, height: Int): Surface =
     lib.cairo_image_surface_create(format.value, width, height)
 
   def image_surface_create_from_png(filename: String): Surface =
-    Zone(implicit z => lib.cairo_image_surface_create_from_png(toCString(filename))) //2577
+    Zone(implicit z => lib.cairo_image_surface_create_from_png(toCString(filename)))
+
+  def pattern_create_linear(x0: CDouble, y0: CDouble, x1: CDouble, y1: CDouble): Pattern =
+    lib.cairo_pattern_create_linear(x0, y0, x1, y1)
+
+  def pattern_create_radial(cx0: CDouble,
+                            cy0: CDouble,
+                            radius0: CDouble,
+                            cx1: CDouble,
+                            cy1: CDouble,
+                            radius1: CDouble): Pattern =
+    lib.cairo_pattern_create_radial(cx0, cy0, radius0, cx1, cy1, radius1)
 
   // enums
 
