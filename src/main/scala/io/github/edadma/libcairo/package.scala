@@ -6,9 +6,17 @@ import io.github.edadma.libcairo.extern.{LibCairo => lib}
 
 package object libcairo {
 
-  implicit class Surface private[libcairo] (val ptr: lib.cairo_surface_tp) {
+  implicit class Surface private[libcairo] (val surface: lib.cairo_surface_tp) {
+    def cairo_create: Cairo = lib.cairo_create(surface)
     def write_to_png(filename: String): lib.cairo_status_t =
-      Zone(implicit z => lib.cairo_surface_write_to_png(ptr, toCString(filename))) //2433
+      Zone(implicit z => lib.cairo_surface_write_to_png(surface, toCString(filename)))
+  }
+
+  implicit class Cairo private[libcairo] (val cr: lib.cairo_tp) {
+    def reference: Cairo = lib.cairo_reference(cr)
+    def destroy(): Unit  = lib.cairo_destroy(cr)
+    def cairo_set_source_rgb(red: Double, green: Double, blue: Double): Unit =
+      lib.cairo_set_source_rgb(cr, red, green, blue)
   }
 
   def image_surface_create_from_png(filename: String): Surface =
