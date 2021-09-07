@@ -2,7 +2,17 @@ package io.github.edadma
 
 import scala.scalanative.unsafe._
 
+import io.github.edadma.libcairo.extern.{LibCairo => lib}
+
 package object libcairo {
+
+  implicit class Surface private[libcairo] (val ptr: lib.cairo_surface_tp) {
+    def write_to_png(filename: String): lib.cairo_status_t =
+      Zone(implicit z => lib.cairo_surface_write_to_png(ptr, toCString(filename))) //2433
+  }
+
+  def image_surface_create_from_png(filename: String): Surface =
+    Zone(implicit z => lib.cairo_image_surface_create_from_png(toCString(filename))) //2577
 
   // enums
 
