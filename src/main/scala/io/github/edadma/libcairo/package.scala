@@ -23,6 +23,7 @@ package object libcairo {
     def move_to(x: Double, y: Double): Unit = lib.cairo_move_to(cr, x, y)
     def rectangle(x: CDouble, y: CDouble, width: CDouble, height: CDouble): Unit =
       lib.cairo_rectangle(cr, x, y, width, height)
+    def paint(): Unit                         = lib.cairo_paint(cr)
     def paint_with_alpha(alpha: Double): Unit = lib.cairo_paint_with_alpha(cr, alpha)
     def mask(source: Pattern): Unit           = lib.cairo_mask(cr, source.pattern)
     def stroke(): Unit                        = lib.cairo_stroke(cr)

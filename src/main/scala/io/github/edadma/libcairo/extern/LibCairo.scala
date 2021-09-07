@@ -27,6 +27,7 @@ object LibCairo {
   def cairo_set_line_width(cr: cairo_tp, width: CDouble): Unit                                     = extern //762
   def cairo_move_to(cr: cairo_tp, x: CDouble, y: CDouble): Unit                                    = extern //855
   def cairo_rectangle(cr: cairo_tp, x: CDouble, y: CDouble, width: CDouble, height: CDouble): Unit = extern //902
+  def cairo_paint(cr: cairo_tp): Unit                                                              = extern //921
   def cairo_paint_with_alpha(cr: cairo_tp, alpha: CDouble): Unit                                   = extern //924
   def cairo_mask(cr: cairo_tp, source: cairo_pattern_tp): Unit                                     = extern //928
   def cairo_stroke(cr: cairo_tp): Unit                                                             = extern //938
