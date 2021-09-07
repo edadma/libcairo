@@ -196,4 +196,87 @@ package object libcairo {
     final val CLOSE_PATH = new PathDataType(3)
   }
 
+  class DeviceType(val value: CInt) extends AnyVal
+  object DeviceType {
+    final val DRM     = new DeviceType(0)
+    final val GL      = new DeviceType(1)
+    final val SCRIPT  = new DeviceType(2)
+    final val XCB     = new DeviceType(3)
+    final val XLIB    = new DeviceType(4)
+    final val XML     = new DeviceType(5)
+    final val COGL    = new DeviceType(6)
+    final val WIN32   = new DeviceType(7)
+    final val INVALID = new DeviceType(-1)
+  }
+
+  class SurfaceObserverMode(val value: CInt) extends AnyVal
+  object SurfaceObserverMode {
+    final val NORMAL            = new SurfaceObserverMode(0)
+    final val RECORD_OPERATIONS = new SurfaceObserverMode(0x1)
+  }
+
+  class SurfaceType(val value: CInt) extends AnyVal
+  object SurfaceType {
+    final val IMAGE          = new SurfaceType(0)
+    final val PDF            = new SurfaceType(1)
+    final val PS             = new SurfaceType(2)
+    final val XLIB           = new SurfaceType(3)
+    final val XCB            = new SurfaceType(4)
+    final val GLITZ          = new SurfaceType(5)
+    final val QUARTZ         = new SurfaceType(6)
+    final val WIN32          = new SurfaceType(7)
+    final val BEOS           = new SurfaceType(8)
+    final val DIRECTFB       = new SurfaceType(9)
+    final val SVG            = new SurfaceType(10)
+    final val OS2            = new SurfaceType(11)
+    final val WIN32_PRINTING = new SurfaceType(12)
+    final val QUARTZ_IMAGE   = new SurfaceType(13)
+    final val SCRIPT         = new SurfaceType(14)
+    final val QT             = new SurfaceType(15)
+    final val RECORDING      = new SurfaceType(16)
+    final val VG             = new SurfaceType(17)
+    final val GL             = new SurfaceType(18)
+    final val DRM            = new SurfaceType(19)
+    final val TEE            = new SurfaceType(20)
+    final val XML            = new SurfaceType(21)
+    final val SKIA           = new SurfaceType(22)
+    final val SUBSURFACE     = new SurfaceType(23)
+    final val COGL           = new SurfaceType(24)
+  }
+
+  class PatternType(val value: CInt) extends AnyVal
+  object PatternType {
+    final val SOLID         = new PatternType(0)
+    final val SURFACE       = new PatternType(1)
+    final val LINEAR        = new PatternType(2)
+    final val RADIAL        = new PatternType(3)
+    final val MESH          = new PatternType(4)
+    final val RASTER_SOURCE = new PatternType(5)
+  }
+
+  class Extend(val value: CInt) extends AnyVal
+  object Extend {
+    final val NONE    = new Extend(0)
+    final val REPEAT  = new Extend(1)
+    final val REFLECT = new Extend(2)
+    final val PAD     = new Extend(3)
+  }
+
+  class Filter(val value: CInt) extends AnyVal
+  object Filter {
+    final val FAST     = new Filter(0)
+    final val GOOD     = new Filter(1)
+    final val BEST     = new Filter(2)
+    final val NEAREST  = new Filter(3)
+    final val BILINEAR = new Filter(4)
+    final val GAUSSIAN = new Filter(5)
+  }
+
+  class RegionOverlap(val value: CInt) extends AnyVal
+  object RegionOverlap {
+    final val IN   = new RegionOverlap(0)
+    final val OUT  = new RegionOverlap(1)
+    final val PART = new RegionOverlap(2)
+  }
+
 }
