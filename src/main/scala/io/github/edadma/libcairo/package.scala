@@ -1,6 +1,7 @@
 package io.github.edadma
 
 import scala.scalanative.unsafe._
+import scala.scalanative.libc.stdlib._
 
 import io.github.edadma.libcairo.extern.{LibCairo => lib}
 
@@ -23,7 +24,33 @@ package object libcairo {
       lib.cairo_rectangle(cr, x, y, width, height)
     def stroke(): Unit = lib.cairo_stroke(cr)
     def fill(): Unit   = lib.cairo_fill(cr)
+    def select_font_face(family: String, slant: FontSlant, weight: FontWeight): Unit =
+      Zone(implicit z => lib.cairo_select_font_face(cr, toCString(family), slant.value, weight.value))
+    def set_font_size(size: Double): Unit = lib.cairo_set_font_size(cr, size)
+    def show_text(utf8: String): Unit     = Zone(implicit z => lib.cairo_show_text(cr, toCString(utf8)))
+    def text_extents(utf8: String): Extents = Zone { implicit z =>
+      val extents: ExtentsOps = stackalloc[lib.cairo_text_extents_t]
+
+      lib.cairo_text_extents(cr, toCString(utf8), extents.ptr)
+      Extents(extents.x_bearing, extents.y_bearing, extents.width, extents.height, extents.x_advance, extents.y_advance)
+    }
   }
+
+  implicit class ExtentsOps(val ptr: lib.cairo_text_extents_tp) extends AnyVal {
+    def x_bearing: Double = ptr._1
+    def y_bearing: Double = ptr._2
+    def width: Double     = ptr._3
+    def height: Double    = ptr._4
+    def x_advance: Double = ptr._5
+    def y_advance: Double = ptr._6
+  }
+
+  case class Extents(x_bearing: Double,
+                     y_bearing: Double,
+                     width: Double,
+                     height: Double,
+                     x_advance: Double,
+                     y_advance: Double)
 
   def image_surface_create(format: Format, width: Int, height: Int): Surface =
     lib.cairo_image_surface_create(format.value, width, height)
