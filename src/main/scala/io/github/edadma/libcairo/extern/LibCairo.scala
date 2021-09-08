@@ -22,6 +22,8 @@ object LibCairo {
   type cairo_pattern_tp      = Ptr[cairo_pattern_t]
   type cairo_font_options_t  = CStruct0
   type cairo_font_options_tp = Ptr[cairo_font_options_t]
+  type cairo_matrix_t        = CStruct6[CDouble, CDouble, CDouble, CDouble, CDouble, CDouble]
+  type cairo_matrix_tp       = Ptr[cairo_matrix_t]
 
   def cairo_create(target: cairo_surface_tp): cairo_tp = extern //491
 
@@ -39,6 +41,8 @@ object LibCairo {
   def cairo_set_line_width(cr: cairo_tp, width: CDouble): Unit = extern //762
 
   def cairo_set_dash(cr: cairo_tp, dashes: Ptr[CDouble], num_dashes: CInt, offset: CDouble): Unit = extern //810
+
+  def cairo_translate(cr: cairo_tp, tx: CDouble, ty: CDouble): Unit = extern //819
 
   def cairo_scale(cr: cairo_tp, sx: CDouble, sy: CDouble): Unit = extern //822
 

@@ -41,6 +41,8 @@ package object libcairo {
       lib.cairo_set_dash(cr, a, dashes.length, offset)
     }
 
+    def translate(tx: Double, ty: Double): Unit = lib.cairo_scale(cr, tx, ty)
+
     def scale(sx: Double, sy: Double): Unit = lib.cairo_scale(cr, sx, sy)
 
     def deviceToUser(dx: Double, dy: Double): (Double, Double) = {
@@ -166,6 +168,8 @@ package object libcairo {
     def addColorStopRGBA(offset: CDouble, red: CDouble, green: CDouble, blue: CDouble, alpha: CDouble): Unit =
       lib.cairo_pattern_add_color_stop_rgba(pattern, offset, red, green, blue, alpha)
   }
+
+  implicit class Matrix private[libcairo] (val matrix: lib.cairo_matrix_tp) extends AnyVal {}
 
   def imageSurfaceCreate(format: Format, width: Int, height: Int): Surface =
     lib.cairo_image_surface_create(format.value, width, height)
