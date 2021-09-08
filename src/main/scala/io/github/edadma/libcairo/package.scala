@@ -162,16 +162,23 @@ package object libcairo {
   case class FontExtents(ascent: Double, descent: Double, height: Double, maxXAdvance: Double, maxYAdvance: Double)
 
   implicit class Pattern private[libcairo] (val pattern: lib.cairo_pattern_tp) extends AnyVal {
-    def addColorStopRGB(offset: CDouble, red: CDouble, green: CDouble, blue: CDouble): Unit =
+    def addColorStopRGB(offset: Double, red: Double, green: Double, blue: Double): Unit =
       lib.cairo_pattern_add_color_stop_rgb(pattern, offset, red, green, blue)
 
-    def addColorStopRGBA(offset: CDouble, red: CDouble, green: CDouble, blue: CDouble, alpha: CDouble): Unit =
+    def addColorStopRGBA(offset: Double, red: Double, green: Double, blue: Double, alpha: Double): Unit =
       lib.cairo_pattern_add_color_stop_rgba(pattern, offset, red, green, blue, alpha)
   }
 
   implicit class Matrix private[libcairo] (val matrix: lib.cairo_matrix_tp) extends AnyVal {
-    def matrixInit(xx: CDouble, yx: CDouble, xy: CDouble, yy: CDouble, x0: CDouble, y0: CDouble): Unit =
+    def matrixInit(xx: Double, yx: Double, xy: Double, yy: Double, x0: Double, y0: Double): Unit =
       lib.cairo_matrix_init(matrix, xx, yx, xy, yy, x0, y0)
+
+    def initTranslate(tx: Double, ty: Double): Unit = lib.cairo_matrix_init_translate(matrix, tx, ty)
+
+    def initScale(tx: Double, ty: Double): Unit = lib.cairo_matrix_init_scale(matrix, tx, ty)
+
+    def initRotate(radians: Double): Unit = lib.cairo_matrix_init_rotate(matrix, radians)
+
   }
 
   def imageSurfaceCreate(format: Format, width: Int, height: Int): Surface =
@@ -180,15 +187,15 @@ package object libcairo {
   def imageSurfaceCreateFromPNG(filename: String): Surface =
     Zone(implicit z => lib.cairo_image_surface_create_from_png(toCString(filename)))
 
-  def patternCreateLinear(x0: CDouble, y0: CDouble, x1: CDouble, y1: CDouble): Pattern =
+  def patternCreateLinear(x0: Double, y0: Double, x1: Double, y1: Double): Pattern =
     lib.cairo_pattern_create_linear(x0, y0, x1, y1)
 
-  def patternCreateRadial(cx0: CDouble,
-                          cy0: CDouble,
-                          radius0: CDouble,
-                          cx1: CDouble,
-                          cy1: CDouble,
-                          radius1: CDouble): Pattern =
+  def patternCreateRadial(cx0: Double,
+                          cy0: Double,
+                          radius0: Double,
+                          cx1: Double,
+                          cy1: Double,
+                          radius1: Double): Pattern =
     lib.cairo_pattern_create_radial(cx0, cy0, radius0, cx1, cy1, radius1)
 
   // enums

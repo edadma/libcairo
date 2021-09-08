@@ -141,4 +141,13 @@ object LibCairo {
                         yy: CDouble,
                         x0: CDouble,
                         y0: CDouble): Unit = extern //3018
+
+  def cairo_matrix_init_identity(matrix: cairo_matrix_tp): Unit = extern //3024
+
+  def cairo_matrix_init_translate(matrix: cairo_matrix_tp, tx: CDouble, ty: CDouble): Unit = extern //3027
+
+  def cairo_matrix_init_scale(matrix: cairo_matrix_tp, sx: CDouble, sy: CDouble): Unit = extern //3031
+
+  def cairo_matrix_init_rotate(matrix: cairo_matrix_tp, radians: CDouble): Unit = extern //3035
+
 }
