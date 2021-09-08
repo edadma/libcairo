@@ -133,4 +133,12 @@ object LibCairo {
                                         green: CDouble,
                                         blue: CDouble,
                                         alpha: CDouble): Unit = extern //2842
+
+  def cairo_matrix_init(matrix: cairo_matrix_tp,
+                        xx: CDouble,
+                        yx: CDouble,
+                        xy: CDouble,
+                        yy: CDouble,
+                        x0: CDouble,
+                        y0: CDouble): Unit = extern //3018
 }

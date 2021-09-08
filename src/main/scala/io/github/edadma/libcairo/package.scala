@@ -169,7 +169,10 @@ package object libcairo {
       lib.cairo_pattern_add_color_stop_rgba(pattern, offset, red, green, blue, alpha)
   }
 
-  implicit class Matrix private[libcairo] (val matrix: lib.cairo_matrix_tp) extends AnyVal {}
+  implicit class Matrix private[libcairo] (val matrix: lib.cairo_matrix_tp) extends AnyVal {
+    def matrixInit(xx: CDouble, yx: CDouble, xy: CDouble, yy: CDouble, x0: CDouble, y0: CDouble): Unit =
+      lib.cairo_matrix_init(matrix, xx, yx, xy, yy, x0, y0)
+  }
 
   def imageSurfaceCreate(format: Format, width: Int, height: Int): Surface =
     lib.cairo_image_surface_create(format.value, width, height)
