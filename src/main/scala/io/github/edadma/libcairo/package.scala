@@ -1,6 +1,8 @@
 package io.github.edadma
 
 import scala.scalanative.unsafe._
+import scala.scalanative.unsigned._
+import scala.scalanative.libc.stdlib._
 
 import io.github.edadma.libcairo.extern.{LibCairo => lib}
 
@@ -30,7 +32,25 @@ package object libcairo {
 
     def setLineWidth(width: Double): Unit = lib.cairo_set_line_width(cr, width)
 
+    def setDash(dashes: collection.Seq[Double], offset: Double): Unit = {
+      //      val a = stackalloc[CDouble](dashes.length.toUInt)
+      val a = malloc(dashes.length.toUInt * sizeof[CDouble]).asInstanceOf[Ptr[CDouble]] //todo
+
+      for ((d, i) <- dashes.zipWithIndex)
+        a(i) = d
+
+      lib.cairo_set_dash(cr, a, dashes.length, offset)
+    }
+
     def scale(sx: Double, sy: Double): Unit = lib.cairo_scale(cr, sx, sy)
+
+    def deviceToUserDistance: (Double, Double) = {
+      val dx = stackalloc[CDouble]
+      val dy = stackalloc[CDouble]
+
+      lib.cairo_device_to_user_distance(cr, dx, dy)
+      (!dx, !dy)
+    }
 
     def moveTo(x: Double, y: Double): Unit = lib.cairo_move_to(cr, x, y)
 
@@ -68,15 +88,30 @@ package object libcairo {
 
     def setFontSize(size: Double): Unit = lib.cairo_set_font_size(cr, size)
 
-    def showText(utf8: String): Unit = Zone(implicit z => lib.cairo_show_text(cr, toCString(utf8)))
+    def setFontOptions(options: FontOptions): Unit = lib.cairo_set_font_options(cr, options.ptr)
+
+    def getFontOptions(options: FontOptions): Unit = lib.cairo_get_font_options(cr, options.ptr)
+
+    def showText(utf8: String): Unit = Zone(implicit z => lib.cairo_show_text(cr, /*toCString(utf8)*/ c"joy")) //todo
+
+    def textPath(utf8: String): Unit = Zone(implicit z => lib.cairo_text_path(cr, /*toCString(utf8)*/ c"joy")) //todo
 
     def textExtents(utf8: String): TextExtents = Zone { implicit z =>
       val extents: TextExtentsOps = stackalloc[lib.cairo_text_extents_t]
 
-      lib.cairo_text_extents(cr, toCString(utf8), extents.ptr)
+      lib.cairo_text_extents(cr, /*toCString(utf8)*/ c"joy", extents.ptr) //todo
       TextExtents(extents.xBearing, extents.yBearing, extents.width, extents.height, extents.xAdvance, extents.yAdvance)
     }
+
+    def fontExtents: FontExtents = {
+      val extents: FontExtentsOps = stackalloc[lib.cairo_font_extents_t]
+
+      lib.cairo_font_extents(cr, extents.ptr)
+      FontExtents(extents.ascent, extents.descent, extents.height, extents.maxXAdvance, extents.maxYAdvance)
+    }
   }
+
+  implicit class FontOptions private[libcairo] (val ptr: lib.cairo_font_options_tp) {}
 
   implicit class TextExtentsOps(val ptr: lib.cairo_text_extents_tp) extends AnyVal {
     def xBearing: Double = ptr._1
@@ -98,6 +133,20 @@ package object libcairo {
                          height: Double,
                          xAdvance: Double,
                          yAdvance: Double)
+
+  implicit class FontExtentsOps(val ptr: lib.cairo_font_extents_tp) extends AnyVal {
+    def ascent: Double = ptr._1
+
+    def descent: Double = ptr._2
+
+    def height: Double = ptr._3
+
+    def maxXAdvance: Double = ptr._4
+
+    def maxYAdvance: Double = ptr._5
+  }
+
+  case class FontExtents(ascent: Double, descent: Double, height: Double, maxXAdvance: Double, maxYAdvance: Double)
 
   implicit class Pattern private[libcairo] (val pattern: lib.cairo_pattern_tp) extends AnyVal {
     def addColorStopRGB(offset: CDouble, red: CDouble, green: CDouble, blue: CDouble): Unit =

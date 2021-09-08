@@ -16,8 +16,12 @@ object LibCairo {
   type cairo_font_weight_t   = CInt
   type cairo_text_extents_t  = CStruct6[CDouble, CDouble, CDouble, CDouble, CDouble, CDouble]
   type cairo_text_extents_tp = Ptr[cairo_text_extents_t]
+  type cairo_font_extents_t  = CStruct5[CDouble, CDouble, CDouble, CDouble, CDouble]
+  type cairo_font_extents_tp = Ptr[cairo_font_extents_t]
   type cairo_pattern_t       = CStruct0
   type cairo_pattern_tp      = Ptr[cairo_pattern_t]
+  type cairo_font_options_t  = CStruct0
+  type cairo_font_options_tp = Ptr[cairo_font_options_t]
 
   def cairo_create(target: cairo_surface_tp): cairo_tp = extern //491
 
@@ -34,7 +38,11 @@ object LibCairo {
 
   def cairo_set_line_width(cr: cairo_tp, width: CDouble): Unit = extern //762
 
+  def cairo_set_dash(cr: cairo_tp, dashes: Ptr[CDouble], num_dashes: CInt, offset: CDouble): Unit = extern //810
+
   def cairo_scale(cr: cairo_tp, sx: CDouble, sy: CDouble): Unit = extern //822
+
+  def cairo_device_to_user_distance(cr: cairo_tp, dx: Ptr[CDouble], dy: Ptr[CDouble]): Unit = extern //848
 
   def cairo_move_to(cr: cairo_tp, x: CDouble, y: CDouble): Unit = extern //855
 
@@ -78,9 +86,17 @@ object LibCairo {
 
   def cairo_set_font_size(cr: cairo_tp, size: CDouble): Unit = extern //1450
 
+  def cairo_set_font_options(cr: cairo_tp, options: cairo_font_options_tp): Unit = extern //1461
+
+  def cairo_get_font_options(cr: cairo_tp, options: cairo_font_options_tp): Unit = extern //1465
+
   def cairo_show_text(cr: cairo_tp, utf8: CString): Unit = extern //1482
 
+  def cairo_text_path(cr: cairo_tp, utf8: CString): Unit = extern //1498
+
   def cairo_text_extents(cr: cairo_tp, utf8: CString, extents: cairo_text_extents_tp): Unit = extern //1504
+
+  def cairo_font_extents(cr: cairo_tp, extents: cairo_font_extents_tp): Unit = extern //1515
 
   def cairo_surface_destroy(surface: cairo_surface_tp): Unit = extern //2334
 
