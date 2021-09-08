@@ -42,6 +42,8 @@ object LibCairo {
 
   def cairo_scale(cr: cairo_tp, sx: CDouble, sy: CDouble): Unit = extern //822
 
+  def cairo_device_to_user(cr: cairo_tp, dx: Ptr[CDouble], dy: Ptr[CDouble]): Unit = extern //845
+
   def cairo_device_to_user_distance(cr: cairo_tp, dx: Ptr[CDouble], dy: Ptr[CDouble]): Unit = extern //848
 
   def cairo_move_to(cr: cairo_tp, x: CDouble, y: CDouble): Unit = extern //855

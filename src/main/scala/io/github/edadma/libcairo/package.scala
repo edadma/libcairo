@@ -43,6 +43,16 @@ package object libcairo {
 
     def scale(sx: Double, sy: Double): Unit = lib.cairo_scale(cr, sx, sy)
 
+    def deviceToUser(dx: Double, dy: Double): (Double, Double) = {
+      val dxp = stackalloc[CDouble]
+      val dyp = stackalloc[CDouble]
+
+      !dxp = dx
+      !dyp = dy
+      lib.cairo_device_to_user(cr, dxp, dyp)
+      (!dxp, !dyp)
+    }
+
     def deviceToUserDistance(dx: Double, dy: Double): (Double, Double) = {
       val dxp = stackalloc[CDouble]
       val dyp = stackalloc[CDouble]
