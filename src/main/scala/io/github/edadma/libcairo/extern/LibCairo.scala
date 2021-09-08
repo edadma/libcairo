@@ -150,4 +150,18 @@ object LibCairo {
 
   def cairo_matrix_init_rotate(matrix: cairo_matrix_tp, radians: CDouble): Unit = extern //3035
 
+  def cairo_matrix_translate(matrix: cairo_matrix_tp, tx: CDouble, ty: CDouble): Unit = extern //3039
+
+  def cairo_matrix_scale(matrix: cairo_matrix_tp, sx: CDouble, sy: CDouble): Unit = extern //3042
+
+  def cairo_matrix_rotate(matrix: cairo_matrix_tp, radians: CDouble): Unit = extern //3045
+
+  def cairo_matrix_invert(matrix: cairo_matrix_tp): cairo_status_t = extern //3048
+
+  def cairo_matrix_multiply(result: cairo_matrix_tp, a: cairo_matrix_tp, b: cairo_matrix_tp): Unit = extern //3051
+
+  def cairo_matrix_transform_distance(matrix: cairo_matrix_tp, dx: Ptr[CDouble], dy: Ptr[CDouble]): Unit = extern //3056
+
+  def cairo_matrix_transform_point(matrix: cairo_matrix_tp, x: Ptr[CDouble], y: Ptr[CDouble]): Unit = extern //3060
+
 }

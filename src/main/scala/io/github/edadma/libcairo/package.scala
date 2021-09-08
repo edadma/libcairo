@@ -179,6 +179,34 @@ package object libcairo {
 
     def initRotate(radians: Double): Unit = lib.cairo_matrix_init_rotate(matrix, radians)
 
+    def translate(tx: Double, ty: Double): Unit = lib.cairo_matrix_translate(matrix, tx, ty)
+
+    def scale(tx: Double, ty: Double): Unit = lib.cairo_matrix_scale(matrix, tx, ty)
+
+    def rotate(radians: Double): Unit = lib.cairo_matrix_rotate(matrix, radians)
+
+    def multiply(b: Matrix, result: Matrix): Unit = lib.cairo_matrix_multiply(result.matrix, matrix, b.matrix)
+
+    def transformDistance(dx: CDouble, dy: CDouble): (Double, Double) = {
+      val dxp = stackalloc[CDouble]
+      val dyp = stackalloc[CDouble]
+
+      !dxp = dx
+      !dyp = dy
+      lib.cairo_matrix_transform_distance(matrix, dxp, dyp)
+      (!dxp, !dyp)
+    }
+
+    def transformPoint(x: CDouble, y: CDouble): (Double, Double) = {
+      val xp = stackalloc[CDouble]
+      val yp = stackalloc[CDouble]
+
+      !xp = x
+      !yp = y
+      lib.cairo_matrix_transform_distance(matrix, xp, yp)
+      (!xp, !yp)
+    }
+
   }
 
   def imageSurfaceCreate(format: Format, width: Int, height: Int): Surface =
