@@ -27,7 +27,7 @@
 //  cr.setSourceRGBA(0, 0, 1, 0.40)
 //  cr.fill()
 //
-//  surface.writeToPNG("image1.png")
+//  surface.writeToPNG("setsourcergba.png")
 //
 //  cr.destroy()
 //  surface.destroy()
@@ -67,8 +67,37 @@
 //  cr.setSource(linpat)
 //  cr.fill()
 //
-//  surface.writeToPNG("image2.png")
+//  surface.writeToPNG("setsourcegradient.png")
 //
+//  cr.destroy()
+//  surface.destroy()
+//
+//}
+
+//import math._
+//
+//import io.github.edadma.libcairo._
+//
+//object Main extends App {
+//
+//  val surface = imageSurfaceCreate(Format.ARGB32, 120, 120)
+//  val cr      = surface.create
+//
+//  cr.scale(120, 120)
+//
+//  cr.setLineWidth(0.1)
+//  cr.setSourceRGB(0, 0, 0)
+//
+//  cr.moveTo(0.25, 0.25)
+//  cr.lineTo(0.5, 0.375)
+//  cr.relLineTo(0.25, -0.125)
+//  cr.arc(0.5, 0.5, 0.25 * sqrt(2), -0.25 * Pi, 0.25 * Pi)
+//  cr.relCurveTo(-0.25, -0.125, -0.25, 0.125, -0.5, 0)
+//  cr.closePath()
+//
+//  cr.stroke()
+//
+//  surface.writeToPNG("path-close.png")
 //  cr.destroy()
 //  surface.destroy()
 //

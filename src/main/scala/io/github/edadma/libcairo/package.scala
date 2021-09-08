@@ -36,8 +36,18 @@ package object libcairo {
 
     def lineTo(x: Double, y: Double): Unit = lib.cairo_line_to(cr, x, y)
 
+    def arc(x: Double, y: Double, radius: Double, angle1: Double, angle2: Double): Unit =
+      lib.cairo_arc(cr, x, y, radius, angle1, angle2)
+
+    def relLineTo(x: Double, y: Double): Unit = lib.cairo_rel_line_to(cr, x, y)
+
+    def relCurveTo(dx1: Double, dy1: Double, dx2: Double, dy2: Double, dx3: Double, dy3: Double): Unit =
+      lib.cairo_rel_curve_to(cr, dx1, dy1, dx2, dy2, dx3, dy3)
+
     def rectangle(x: CDouble, y: CDouble, width: CDouble, height: CDouble): Unit =
       lib.cairo_rectangle(cr, x, y, width, height)
+
+    def closePath(): Unit = lib.cairo_close_path(cr)
 
     def paint(): Unit = lib.cairo_paint(cr)
 
@@ -47,7 +57,11 @@ package object libcairo {
 
     def stroke(): Unit = lib.cairo_stroke(cr)
 
+    def strokePreserve(): Unit = lib.cairo_stroke_preserve(cr)
+
     def fill(): Unit = lib.cairo_fill(cr)
+
+    def fillPreserve(): Unit = lib.cairo_fill_preserve(cr)
 
     def selectFontFace(family: String, slant: FontSlant, weight: FontWeight): Unit =
       Zone(implicit z => lib.cairo_select_font_face(cr, toCString(family), slant.value, weight.value))

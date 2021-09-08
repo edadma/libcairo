@@ -40,7 +40,22 @@ object LibCairo {
 
   def cairo_line_to(cr: cairo_tp, x: CDouble, y: CDouble): Unit = extern //861
 
+  def cairo_arc(cr: cairo_tp, x: CDouble, y: CDouble, radius: CDouble, angle1: CDouble, angle2: CDouble): Unit =
+    extern //870
+
+  def cairo_rel_line_to(cr: cairo_tp, x: CDouble, y: CDouble): Unit = extern //893
+
+  def cairo_rel_curve_to(cr: cairo_tp,
+                         dx1: CDouble,
+                         dy1: CDouble,
+                         dx2: CDouble,
+                         dy2: CDouble,
+                         dx3: CDouble,
+                         dy3: CDouble): Unit = extern //896
+
   def cairo_rectangle(cr: cairo_tp, x: CDouble, y: CDouble, width: CDouble, height: CDouble): Unit = extern //902
+
+  def cairo_close_path(cr: cairo_tp): Unit = extern //912
 
   def cairo_paint(cr: cairo_tp): Unit = extern //921
 
@@ -50,7 +65,11 @@ object LibCairo {
 
   def cairo_stroke(cr: cairo_tp): Unit = extern //938
 
+  def cairo_stroke_preserve(cr: cairo_tp): Unit = extern //941
+
   def cairo_fill(cr: cairo_tp): Unit = extern //944
+
+  def cairo_fill_preserve(cr: cairo_tp): Unit = extern //947
 
   def cairo_select_font_face(cr: cairo_tp,
                              family: CString,

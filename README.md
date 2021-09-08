@@ -40,7 +40,7 @@ Include the following in your `build.sbt`:
 ```sbt
 resolvers += Resolver.githubPackages("edadma")
 
-libraryDependencies += "io.github.edadma" %%% "libcairo" % "0.1.0"
+libraryDependencies += "io.github.edadma" %%% "libcairo" % "0.1.1"
 
 ```
 
@@ -59,9 +59,9 @@ their [tutorial](https://www.cairographics.org/tutorial/#L1drawing).
 
 ### Example 1
 
-This example creates a PNG file called `image1.png` containing the following image:
+This example creates a PNG file called `setsourcergba.png` containing the following image:
 
-![image1](https://raw.githubusercontent.com/edadma/libcairo/main/image1.png)
+![image1](https://raw.githubusercontent.com/edadma/libcairo/main/setsourcergba.png)
 
 ```scala
 import io.github.edadma.libcairo._
@@ -93,7 +93,7 @@ object Main extends App {
   cr.setSourceRGBA(0, 0, 1, 0.40)
   cr.fill()
 
-  surface.writeToPNG("image1.png")
+  surface.writeToPNG("setsourcergba.png")
 
   cr.destroy()
   surface.destroy()
@@ -104,9 +104,9 @@ object Main extends App {
 
 ### Example 2
 
-This example creates a PNG file called `image2.png` containing the following image:
+This example creates a PNG file called `setsourcegradient.png` containing the following image:
 
-![image2](https://raw.githubusercontent.com/edadma/libcairo/main/image2.png)
+![image2](https://raw.githubusercontent.com/edadma/libcairo/main/setsourcegradient.png)
 
 ```scala
 import io.github.edadma.libcairo._
@@ -142,8 +142,47 @@ object Main extends App {
   cr.setSource(linpat)
   cr.fill()
 
-  surface.writeToPNG("image2.png")
+  surface.writeToPNG("setsourcegradient.png")
 
+  cr.destroy()
+  surface.destroy()
+
+}
+
+```
+
+### Example 3
+
+This example creates a PNG file called `path-close.png` containing the following image (may not be clearly visible if
+your Github is in dark mode):
+
+![image2](https://raw.githubusercontent.com/edadma/libcairo/main/path-close.png)
+
+```scala
+import math._
+
+import io.github.edadma.libcairo._
+
+object Main extends App {
+
+  val surface = imageSurfaceCreate(Format.ARGB32, 120, 120)
+  val cr = surface.create
+
+  cr.scale(120, 120)
+
+  cr.setLineWidth(0.1)
+  cr.setSourceRGB(0, 0, 0)
+
+  cr.moveTo(0.25, 0.25)
+  cr.lineTo(0.5, 0.375)
+  cr.relLineTo(0.25, -0.125)
+  cr.arc(0.5, 0.5, 0.25 * sqrt(2), -0.25 * Pi, 0.25 * Pi)
+  cr.relCurveTo(-0.25, -0.125, -0.25, 0.125, -0.5, 0)
+  cr.closePath()
+
+  cr.stroke()
+
+  surface.writeToPNG("path-close.png")
   cr.destroy()
   surface.destroy()
 
