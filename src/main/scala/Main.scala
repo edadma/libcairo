@@ -122,7 +122,7 @@ object Main extends App {
   cr.selectFontFace("Georgia", FontSlant.NORMAL, FontWeight.BOLD)
 
   val fe       = cr.fontExtents
-  val (ux, uy) = cr.deviceToUserDistance
+  val (ux, uy) = cr.deviceToUserDistance(1, 1)
   val px       = max(ux, uy)
   val text     = "joy"
   val te       = cr.textExtents(text)

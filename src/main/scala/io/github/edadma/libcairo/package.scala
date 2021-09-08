@@ -33,8 +33,7 @@ package object libcairo {
     def setLineWidth(width: Double): Unit = lib.cairo_set_line_width(cr, width)
 
     def setDash(dashes: collection.Seq[Double], offset: Double): Unit = {
-      //      val a = stackalloc[CDouble](dashes.length.toUInt)
-      val a = malloc(dashes.length.toUInt * sizeof[CDouble]).asInstanceOf[Ptr[CDouble]] //todo
+      val a = stackalloc[CDouble](dashes.length.toUInt)
 
       for ((d, i) <- dashes.zipWithIndex)
         a(i) = d
@@ -44,12 +43,14 @@ package object libcairo {
 
     def scale(sx: Double, sy: Double): Unit = lib.cairo_scale(cr, sx, sy)
 
-    def deviceToUserDistance: (Double, Double) = {
-      val dx = stackalloc[CDouble]
-      val dy = stackalloc[CDouble]
+    def deviceToUserDistance(dx: Double, dy: Double): (Double, Double) = {
+      val dxp = stackalloc[CDouble]
+      val dyp = stackalloc[CDouble]
 
-      lib.cairo_device_to_user_distance(cr, dx, dy)
-      (!dx, !dy)
+      !dxp = dx
+      !dyp = dy
+      lib.cairo_device_to_user_distance(cr, dxp, dyp)
+      (!dxp, !dyp)
     }
 
     def moveTo(x: Double, y: Double): Unit = lib.cairo_move_to(cr, x, y)
@@ -92,14 +93,14 @@ package object libcairo {
 
     def getFontOptions(options: FontOptions): Unit = lib.cairo_get_font_options(cr, options.ptr)
 
-    def showText(utf8: String): Unit = Zone(implicit z => lib.cairo_show_text(cr, /*toCString(utf8)*/ c"joy")) //todo
+    def showText(utf8: String): Unit = Zone(implicit z => lib.cairo_show_text(cr, toCString(utf8)))
 
-    def textPath(utf8: String): Unit = Zone(implicit z => lib.cairo_text_path(cr, /*toCString(utf8)*/ c"joy")) //todo
+    def textPath(utf8: String): Unit = Zone(implicit z => lib.cairo_text_path(cr, toCString(utf8)))
 
     def textExtents(utf8: String): TextExtents = Zone { implicit z =>
       val extents: TextExtentsOps = stackalloc[lib.cairo_text_extents_t]
 
-      lib.cairo_text_extents(cr, /*toCString(utf8)*/ c"joy", extents.ptr) //todo
+      lib.cairo_text_extents(cr, toCString(utf8), extents.ptr)
       TextExtents(extents.xBearing, extents.yBearing, extents.width, extents.height, extents.xAdvance, extents.yAdvance)
     }
 
