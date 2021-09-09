@@ -57,9 +57,11 @@ package object libcairo {
       lib.cairo_set_dash(cr, a, dashes.length, offset)
     }
 
-    def translate(tx: Double, ty: Double): Unit = lib.cairo_scale(cr, tx, ty)
+    def translate(tx: Double, ty: Double): Unit = lib.cairo_translate(cr, tx, ty)
 
     def scale(sx: Double, sy: Double): Unit = lib.cairo_scale(cr, sx, sy)
+
+    def rotate(angle: Double): Unit = lib.cairo_rotate(cr, angle)
 
     def deviceToUser(dx: Double, dy: Double): (Double, Double) = {
       val dxp = stackalloc[CDouble]
