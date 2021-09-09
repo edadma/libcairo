@@ -46,6 +46,8 @@ package object libcairo {
 
     def setLineWidth(width: Double): Unit = lib.cairo_set_line_width(cr, width)
 
+    def setLineJoin(line_join: LineJoin): Unit = lib.cairo_set_line_join(cr, line_join)
+
     def setDash(dashes: collection.Seq[Double], offset: Double): Unit = {
       val a = stackalloc[CDouble](dashes.length.toUInt)
 
@@ -372,7 +374,7 @@ package object libcairo {
     final val SQUARE = new LineCap(2)
   }
 
-  class LineJoin(val value: CInt) extends AnyVal
+  class LineJoin(val value: cairo_line_join_t) extends AnyVal
 
   object LineJoin {
     final val MITER = new LineJoin(0)

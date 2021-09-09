@@ -25,6 +25,7 @@ object LibCairo {
   type cairo_matrix_t        = CStruct6[CDouble, CDouble, CDouble, CDouble, CDouble, CDouble]
   type cairo_matrix_tp       = Ptr[cairo_matrix_t]
   type cairo_content_t       = CInt
+  type cairo_line_join_t     = CInt
 
   def cairo_create(target: cairo_surface_tp): cairo_tp = extern //491
 
@@ -54,6 +55,8 @@ object LibCairo {
     extern //659
 
   def cairo_set_line_width(cr: cairo_tp, width: CDouble): Unit = extern //762
+
+  def cairo_set_line_join(cr: cairo_tp, line_join: cairo_line_join_t): Unit = extern //807
 
   def cairo_set_dash(cr: cairo_tp, dashes: Ptr[CDouble], num_dashes: CInt, offset: CDouble): Unit = extern //810
 
