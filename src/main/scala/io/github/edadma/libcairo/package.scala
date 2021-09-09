@@ -22,6 +22,12 @@ package object libcairo {
 
     def destroy(): Unit = lib.cairo_destroy(cr)
 
+    def getReferenceCount: Int = lib.cairo_get_reference_count(cr).toInt
+
+    def save(): Unit = lib.cairo_save(cr)
+
+    def restore(): Unit = lib.cairo_restore(cr)
+
     def setSource(source: Pattern): Unit = lib.cairo_set_source(cr, source.pattern)
 
     def setSourceRGB(red: Double, green: Double, blue: Double): Unit =

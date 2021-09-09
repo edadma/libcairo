@@ -31,6 +31,12 @@ object LibCairo {
 
   def cairo_destroy(cr: cairo_tp): cairo_tp = extern //497
 
+  def cairo_get_reference_count(cr: cairo_tp): CUnsignedInt = extern //500
+
+  def cairo_save(cr: cairo_tp): Unit = extern //513
+
+  def cairo_restore(cr: cairo_tp): Unit = extern //516
+
   def cairo_set_source(cr: cairo_tp, source: cairo_pattern_tp): Unit = extern //653
 
   def cairo_set_source_rgb(cr: cairo_tp, red: CDouble, green: CDouble, blue: CDouble): Unit = extern //655
