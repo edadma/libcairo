@@ -122,6 +122,10 @@ package object libcairo {
       (!x1, !y1, !x2, !y2)
     }
 
+    def resetClip(): Unit = lib.cairo_reset_clip(cr)
+
+    def clip(): Unit = lib.cairo_clip(cr)
+
     def selectFontFace(family: String, slant: FontSlant, weight: FontWeight): Unit =
       Zone(implicit z => lib.cairo_select_font_face(cr, toCString(family), slant.value, weight.value))
 
