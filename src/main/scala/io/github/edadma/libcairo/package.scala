@@ -46,7 +46,7 @@ package object libcairo {
 
     def setLineWidth(width: Double): Unit = lib.cairo_set_line_width(cr, width)
 
-    def setLineJoin(line_join: LineJoin): Unit = lib.cairo_set_line_join(cr, line_join)
+    def setLineJoin(line_join: LineJoin): Unit = lib.cairo_set_line_join(cr, line_join.value)
 
     def setDash(dashes: collection.Seq[Double], offset: Double): Unit = {
       val a = stackalloc[CDouble](dashes.length.toUInt)
@@ -111,6 +111,16 @@ package object libcairo {
     def fill(): Unit = lib.cairo_fill(cr)
 
     def fillPreserve(): Unit = lib.cairo_fill_preserve(cr)
+
+    def strokeExtents: (Double, Double, Double, Double) = {
+      val x1 = stackalloc[CDouble]
+      val y1 = stackalloc[CDouble]
+      val x2 = stackalloc[CDouble]
+      val y2 = stackalloc[CDouble]
+
+      lib.cairo_stroke_extents(cr, x1, y1, x2, y2)
+      (!x1, !y1, !x2, !y2)
+    }
 
     def selectFontFace(family: String, slant: FontSlant, weight: FontWeight): Unit =
       Zone(implicit z => lib.cairo_select_font_face(cr, toCString(family), slant.value, weight.value))
@@ -374,7 +384,7 @@ package object libcairo {
     final val SQUARE = new LineCap(2)
   }
 
-  class LineJoin(val value: cairo_line_join_t) extends AnyVal
+  class LineJoin(val value: lib.cairo_line_join_t) extends AnyVal
 
   object LineJoin {
     final val MITER = new LineJoin(0)

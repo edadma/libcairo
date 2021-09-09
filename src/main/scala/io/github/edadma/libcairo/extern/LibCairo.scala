@@ -103,6 +103,9 @@ object LibCairo {
 
   def cairo_fill_preserve(cr: cairo_tp): Unit = extern //947
 
+  def cairo_stroke_extents(cr: cairo_tp, x1: Ptr[CDouble], y1: Ptr[CDouble], x2: Ptr[CDouble], y2: Ptr[CDouble]): Unit =
+    extern //967
+
   def cairo_select_font_face(cr: cairo_tp,
                              family: CString,
                              slant: cairo_font_slant_t,
