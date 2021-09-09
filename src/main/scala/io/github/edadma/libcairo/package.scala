@@ -28,6 +28,14 @@ package object libcairo {
 
     def restore(): Unit = lib.cairo_restore(cr)
 
+    def pushGroup(): Unit = lib.cairo_push_group(cr)
+
+    def pushGroupWithContent(content: Content): Unit = lib.cairo_push_group_with_content(cr, content.value)
+
+    def popGroup: Pattern = lib.cairo_pop_group(cr)
+
+    def popGroupToSource(): Unit = lib.cairo_pop_group_to_source(cr)
+
     def setSource(source: Pattern): Unit = lib.cairo_set_source(cr, source.pattern)
 
     def setSourceRGB(red: Double, green: Double, blue: Double): Unit =
@@ -283,7 +291,7 @@ package object libcairo {
     final val LAST_STATUS               = new Status(43)
   }
 
-  class Content(val value: CInt) extends AnyVal
+  class Content(val value: lib.cairo_content_t) extends AnyVal
 
   object Content {
     final val COLOR       = new Content(0x1000)

@@ -24,6 +24,7 @@ object LibCairo {
   type cairo_font_options_tp = Ptr[cairo_font_options_t]
   type cairo_matrix_t        = CStruct6[CDouble, CDouble, CDouble, CDouble, CDouble, CDouble]
   type cairo_matrix_tp       = Ptr[cairo_matrix_t]
+  type cairo_content_t       = CInt
 
   def cairo_create(target: cairo_surface_tp): cairo_tp = extern //491
 
@@ -36,6 +37,14 @@ object LibCairo {
   def cairo_save(cr: cairo_tp): Unit = extern //513
 
   def cairo_restore(cr: cairo_tp): Unit = extern //516
+
+  def cairo_push_group(cr: cairo_tp): Unit = extern //519
+
+  def cairo_push_group_with_content(cr: cairo_tp, content: cairo_content_t): Unit = extern //522
+
+  def cairo_pop_group(cr: cairo_tp): cairo_pattern_tp = extern //524
+
+  def cairo_pop_group_to_source(cr: cairo_tp): Unit = extern //528
 
   def cairo_set_source(cr: cairo_tp, source: cairo_pattern_tp): Unit = extern //653
 
