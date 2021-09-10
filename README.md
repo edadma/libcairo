@@ -40,7 +40,7 @@ Include the following in your `build.sbt`:
 ```sbt
 resolvers += Resolver.githubPackages("edadma")
 
-libraryDependencies += "io.github.edadma" %%% "libcairo" % "0.1.2"
+libraryDependencies += "io.github.edadma" %%% "libcairo" % "0.1.3"
 
 ```
 
