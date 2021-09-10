@@ -148,6 +148,8 @@ object LibCairo {
                                   cy1: CDouble,
                                   radius1: CDouble): cairo_pattern_tp = extern //2764
 
+  def cairo_pattern_destroy(pattern: cairo_pattern_tp): Unit = extern //2774
+
   def cairo_pattern_add_color_stop_rgb(pattern: cairo_pattern_tp,
                                        offset: CDouble,
                                        red: CDouble,

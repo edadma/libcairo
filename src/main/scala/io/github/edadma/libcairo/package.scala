@@ -194,6 +194,8 @@ package object libcairo {
   case class FontExtents(ascent: Double, descent: Double, height: Double, maxXAdvance: Double, maxYAdvance: Double)
 
   implicit class Pattern private[libcairo] (val pattern: lib.cairo_pattern_tp) extends AnyVal {
+    def destroy(): Unit = lib.cairo_destroy(pattern)
+
     def addColorStopRGB(offset: Double, red: Double, green: Double, blue: Double): Unit =
       lib.cairo_pattern_add_color_stop_rgb(pattern, offset, red, green, blue)
 
