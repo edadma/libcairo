@@ -8,7 +8,7 @@ import io.github.edadma.libcairo.extern.{LibCairo => lib}
 
 package object libcairo {
 
-  implicit class Surface private[libcairo] (val surface: lib.cairo_surface_tp) {
+  implicit class Surface(val surface: lib.cairo_surface_tp) {
     def create: Context = lib.cairo_create(surface)
 
     def destroy(): Unit = lib.cairo_surface_destroy(surface)
