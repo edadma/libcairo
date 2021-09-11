@@ -17,7 +17,7 @@ package object libcairo {
       Zone(implicit z => lib.cairo_surface_write_to_png(surface, toCString(filename)))
   }
 
-  implicit class Context private[libcairo] (val cr: lib.cairo_tp) {
+  implicit class Context private[libcairo] (val cr: lib.cairo_tp) extends AnyVal {
     def reference: Context = lib.cairo_reference(cr)
 
     def destroy(): Unit = lib.cairo_destroy(cr)
@@ -156,7 +156,7 @@ package object libcairo {
     }
   }
 
-  implicit class FontOptions private[libcairo] (val ptr: lib.cairo_font_options_tp) {}
+  implicit class FontOptions private[libcairo] (val ptr: lib.cairo_font_options_tp) extends AnyVal {}
 
   implicit class TextExtentsOps(val ptr: lib.cairo_text_extents_tp) extends AnyVal {
     def xBearing: Double = ptr._1
