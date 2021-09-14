@@ -36,6 +36,8 @@ package object libcairo {
 
     def popGroupToSource(): Unit = lib.cairo_pop_group_to_source(cr)
 
+    def setOperator(op: Operator): Unit = lib.cairo_set_operator(cr, op.value)
+
     def setSource(source: Pattern): Unit = lib.cairo_set_source(cr, source.pattern)
 
     def setSourceRGB(red: Double, green: Double, blue: Double): Unit =
@@ -43,6 +45,11 @@ package object libcairo {
 
     def setSourceRGBA(red: Double, green: Double, blue: Double, alpha: Double): Unit =
       lib.cairo_set_source_rgba(cr, red, green, blue, alpha)
+
+    def setSourceSurface(surface: Surface, x: Double, y: Double): Unit =
+      lib.cairo_set_source_surface(cr, surface.surface, x, y)
+
+    def setTolerance(tolerance: Double): Unit = lib.cairo_set_tolerance(cr, tolerance)
 
     def setLineWidth(width: Double): Unit = lib.cairo_set_line_width(cr, width)
 
@@ -331,7 +338,7 @@ package object libcairo {
     final val RGB30     = new Format(5)
   }
 
-  class Operator(val value: CInt) extends AnyVal
+  class Operator(val value: lib.cairo_operator_t) extends AnyVal
 
   object Operator {
     final val CLEAR          = new Operator(0)
@@ -365,7 +372,7 @@ package object libcairo {
     final val HSL_LUMINOSITY = new Operator(28)
   }
 
-  class Antialias(val value: CInt) extends AnyVal
+  class Antialias(val value: lib.cairo_antialias_t) extends AnyVal
 
   object Antialias {
     final val DEFAULT  = new Antialias(0)
@@ -377,7 +384,7 @@ package object libcairo {
     final val BEST     = new Antialias(6)
   }
 
-  class FillRule(val value: CInt) extends AnyVal
+  class FillRule(val value: lib.cairo_fill_rule_t) extends AnyVal
 
   object FillRule {
     final val WINDING  = new FillRule(0)
