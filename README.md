@@ -66,8 +66,7 @@ This example creates a PNG file called `setsourcergba.png` containing the follow
 ```scala
 import io.github.edadma.libcairo._
 
-object Main extends App {
-
+@main def run(): Unit =
   val surface = imageSurfaceCreate(Format.ARGB32, 120, 120)
   val cr = surface.create
 
@@ -97,9 +96,6 @@ object Main extends App {
 
   cr.destroy()
   surface.destroy()
-
-}
-
 ```
 
 ### Example 2
@@ -111,8 +107,7 @@ This example creates a PNG file called `setsourcegradient.png` containing the fo
 ```scala
 import io.github.edadma.libcairo._
 
-object Main extends App {
-
+@main def run(): Unit =
   val surface = imageSurfaceCreate(Format.ARGB32, 120, 120)
   val cr = surface.create
 
@@ -124,8 +119,7 @@ object Main extends App {
   radpat.addColorStopRGB(0, 1.0, 0.8, 0.8)
   radpat.addColorStopRGB(1, 0.9, 0.0, 0.0)
 
-  for (i <- 1 to 9; j <- 1 to 9)
-    cr.rectangle(i / 10.0 - 0.04, j / 10.0 - 0.04, 0.08, 0.08)
+  for i <- 1 to 9; j <- 1 to 9 do cr.rectangle(i / 10.0 - 0.04, j / 10.0 - 0.04, 0.08, 0.08)
 
   cr.setSource(radpat)
   cr.fill()
@@ -146,9 +140,6 @@ object Main extends App {
 
   cr.destroy()
   surface.destroy()
-
-}
-
 ```
 
 ### Example 3
@@ -163,8 +154,7 @@ import math._
 
 import io.github.edadma.libcairo._
 
-object Main extends App {
-
+@main def run(): Unit =
   val surface = imageSurfaceCreate(Format.ARGB32, 120, 120)
   val cr = surface.create
 
@@ -185,9 +175,6 @@ object Main extends App {
   surface.writeToPNG("path-close.png")
   cr.destroy()
   surface.destroy()
-
-}
-
 ```
 
 ### Example 4
@@ -202,8 +189,7 @@ import math._
 
 import io.github.edadma.libcairo._
 
-object Main extends App {
-
+@main def run(): Unit =
   /* Prepare drawing area */
   val surface = imageSurfaceCreate(Format.ARGB32, 240, 240)
   val cr = surface.create
@@ -272,9 +258,6 @@ object Main extends App {
   surface.writeToPNG("textextents.png")
   cr.destroy()
   surface.destroy()
-
-}
-
 ```
 
 Documentation
