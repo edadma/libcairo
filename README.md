@@ -31,7 +31,7 @@ sudo apt install libcairo2-dev
 Include the following in your `project/plugins.sbt`:
 
 ```sbt
-addSbtPlugin("com.codecommit" % "sbt-github-packages" % "0.5.2")
+addSbtPlugin("com.codecommit" % "sbt-github-packages" % "0.5.3")
 
 ```
 
@@ -40,7 +40,7 @@ Include the following in your `build.sbt`:
 ```sbt
 resolvers += Resolver.githubPackages("edadma")
 
-libraryDependencies += "io.github.edadma" %%% "libcairo" % "0.1.4"
+libraryDependencies += "io.github.edadma" %%% "libcairo" % "0.1.5"
 
 ```
 
