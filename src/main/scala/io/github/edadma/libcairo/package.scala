@@ -48,6 +48,8 @@ implicit class Context private[libcairo] (val cr: lib.cairo_tp) extends AnyVal {
 
   def setLineJoin(line_join: LineJoin): Unit = lib.cairo_set_line_join(cr, line_join.value)
 
+  def setLineCap(line_cap: LineCap): Unit = lib.cairo_set_line_cap(cr, line_cap.value)
+
   def setDash(dashes: collection.Seq[Double], offset: Double): Unit = {
     val a = stackalloc[CDouble](dashes.length.toUInt)
 
