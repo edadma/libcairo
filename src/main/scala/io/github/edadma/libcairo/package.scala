@@ -15,57 +15,36 @@ implicit class Surface(val surface: lib.cairo_surface_tp) {
     Zone(implicit z => lib.cairo_surface_write_to_png(surface, toCString(filename)))
 }
 
-implicit class Context private[libcairo] (val cr: lib.cairo_tp) extends AnyVal {
+implicit class Context private[libcairo] (val cr: lib.cairo_tp) extends AnyVal:
   def reference: Context = lib.cairo_reference(cr)
-
   def destroy(): Unit = lib.cairo_destroy(cr)
-
   def newPath(): Unit = lib.cairo_new_path(cr)
-
   def getReferenceCount: Int = lib.cairo_get_reference_count(cr).toInt
-
   def save(): Unit = lib.cairo_save(cr)
-
   def restore(): Unit = lib.cairo_restore(cr)
-
   def pushGroup(): Unit = lib.cairo_push_group(cr)
-
   def pushGroupWithContent(content: Content): Unit = lib.cairo_push_group_with_content(cr, content.value)
-
   def popGroup: Pattern = lib.cairo_pop_group(cr)
-
   def popGroupToSource(): Unit = lib.cairo_pop_group_to_source(cr)
-
   def setSource(source: Pattern): Unit = lib.cairo_set_source(cr, source.pattern)
-
+  def setOperator(op: Operator): Unit = lib.cairo_set_operator(cr, op.value)
   def setSourceRGB(red: Double, green: Double, blue: Double): Unit =
     lib.cairo_set_source_rgb(cr, red, green, blue)
-
   def setSourceRGBA(red: Double, green: Double, blue: Double, alpha: Double): Unit =
     lib.cairo_set_source_rgba(cr, red, green, blue, alpha)
-
   def setLineWidth(width: Double): Unit = lib.cairo_set_line_width(cr, width)
-
   def setLineJoin(line_join: LineJoin): Unit = lib.cairo_set_line_join(cr, line_join.value)
-
   def setLineCap(line_cap: LineCap): Unit = lib.cairo_set_line_cap(cr, line_cap.value)
-
-  def setDash(dashes: collection.Seq[Double], offset: Double): Unit = {
+  def setDash(dashes: collection.Seq[Double], offset: Double): Unit =
     val a = stackalloc[CDouble](dashes.length.toUInt)
 
-    for ((d, i) <- dashes.zipWithIndex)
-      a(i) = d
+    for (d, i) <- dashes.zipWithIndex do a(i) = d
 
     lib.cairo_set_dash(cr, a, dashes.length, offset)
-  }
-
   def translate(tx: Double, ty: Double): Unit = lib.cairo_translate(cr, tx, ty)
-
   def scale(sx: Double, sy: Double): Unit = lib.cairo_scale(cr, sx, sy)
-
   def rotate(angle: Double): Unit = lib.cairo_rotate(cr, angle)
-
-  def deviceToUser(dx: Double, dy: Double): (Double, Double) = {
+  def deviceToUser(dx: Double, dy: Double): (Double, Double) =
     val dxp = stackalloc[CDouble]()
     val dyp = stackalloc[CDouble]()
 
@@ -73,9 +52,7 @@ implicit class Context private[libcairo] (val cr: lib.cairo_tp) extends AnyVal {
     !dyp = dy
     lib.cairo_device_to_user(cr, dxp, dyp)
     (!dxp, !dyp)
-  }
-
-  def deviceToUserDistance(dx: Double, dy: Double): (Double, Double) = {
+  def deviceToUserDistance(dx: Double, dy: Double): (Double, Double) =
     val dxp = stackalloc[CDouble]()
     val dyp = stackalloc[CDouble]()
 
@@ -83,20 +60,13 @@ implicit class Context private[libcairo] (val cr: lib.cairo_tp) extends AnyVal {
     !dyp = dy
     lib.cairo_device_to_user_distance(cr, dxp, dyp)
     (!dxp, !dyp)
-  }
-
   def moveTo(x: Double, y: Double): Unit = lib.cairo_move_to(cr, x, y)
-
   def lineTo(x: Double, y: Double): Unit = lib.cairo_line_to(cr, x, y)
-
   def arc(x: Double, y: Double, radius: Double, angle1: Double, angle2: Double): Unit =
     lib.cairo_arc(cr, x, y, radius, angle1, angle2)
-
   def arcNegative(x: Double, y: Double, radius: Double, angle1: Double, angle2: Double): Unit =
     lib.cairo_arc_negative(cr, x, y, radius, angle1, angle2)
-
   def relLineTo(x: Double, y: Double): Unit = lib.cairo_rel_line_to(cr, x, y)
-
   def relCurveTo(dx1: Double, dy1: Double, dx2: Double, dy2: Double, dx3: Double, dy3: Double): Unit =
     lib.cairo_rel_curve_to(cr, dx1, dy1, dx2, dy2, dx3, dy3)
 
@@ -137,29 +107,24 @@ implicit class Context private[libcairo] (val cr: lib.cairo_tp) extends AnyVal {
     Zone(implicit z => lib.cairo_select_font_face(cr, toCString(family), slant.value, weight.value))
 
   def setFontSize(size: Double): Unit = lib.cairo_set_font_size(cr, size)
-
   def setFontOptions(options: FontOptions): Unit = lib.cairo_set_font_options(cr, options.ptr)
-
   def getFontOptions(options: FontOptions): Unit = lib.cairo_get_font_options(cr, options.ptr)
-
   def showText(utf8: String): Unit = Zone(implicit z => lib.cairo_show_text(cr, toCString(utf8)))
-
   def textPath(utf8: String): Unit = Zone(implicit z => lib.cairo_text_path(cr, toCString(utf8)))
-
   def textExtents(utf8: String): TextExtents = Zone { implicit z =>
     val extents: TextExtentsOps = stackalloc[lib.cairo_text_extents_t]()
 
     lib.cairo_text_extents(cr, toCString(utf8), extents.ptr)
     TextExtents(extents.xBearing, extents.yBearing, extents.width, extents.height, extents.xAdvance, extents.yAdvance)
   }
-
-  def fontExtents: FontExtents = {
+  def fontExtents: FontExtents =
     val extents: FontExtentsOps = stackalloc[lib.cairo_font_extents_t]()
 
     lib.cairo_font_extents(cr, extents.ptr)
     FontExtents(extents.ascent, extents.descent, extents.height, extents.maxXAdvance, extents.maxYAdvance)
-  }
-}
+  def setSourceSurface(surface: Surface, x: Double, y: Double): Unit =
+    lib.cairo_set_source_surface(cr, surface.surface, x, y)
+  def setTolerance(tolerance: Double): Unit = lib.cairo_set_tolerance(cr, tolerance)
 
 implicit class FontOptions private[libcairo] (val ptr: lib.cairo_font_options_tp) extends AnyVal {}
 
@@ -340,7 +305,7 @@ object Format {
   final val RGB30 = new Format(5)
 }
 
-class Operator(val value: CInt) extends AnyVal
+class Operator(val value: lib.cairo_operator_t) extends AnyVal
 
 object Operator {
   final val CLEAR = new Operator(0)
@@ -374,7 +339,7 @@ object Operator {
   final val HSL_LUMINOSITY = new Operator(28)
 }
 
-class Antialias(val value: CInt) extends AnyVal
+class Antialias(val value: lib.cairo_antialias_t) extends AnyVal
 
 object Antialias {
   final val DEFAULT = new Antialias(0)
@@ -386,14 +351,14 @@ object Antialias {
   final val BEST = new Antialias(6)
 }
 
-class FillRule(val value: CInt) extends AnyVal
+class FillRule(val value: lib.cairo_fill_rule_t) extends AnyVal
 
 object FillRule {
   final val WINDING = new FillRule(0)
   final val EVEN_ODD = new FillRule(1)
 }
 
-class LineCap(val value: CInt) extends AnyVal
+class LineCap(val value: lib.cairo_line_cap_t) extends AnyVal
 
 object LineCap {
   final val BUTT = new LineCap(0)

@@ -26,6 +26,9 @@ object LibCairo:
   type cairo_content_t = CInt
   type cairo_line_join_t = CInt
   type cairo_line_cap_t = CInt
+  type cairo_operator_t = CInt
+  type cairo_antialias_t = CInt
+  type cairo_fill_rule_t = CInt
 
   def cairo_create(target: cairo_surface_tp): cairo_tp = extern // 491
   def cairo_reference(cr: cairo_tp): cairo_tp = extern // 494
@@ -37,6 +40,10 @@ object LibCairo:
   def cairo_push_group_with_content(cr: cairo_tp, content: cairo_content_t): Unit = extern // 522
   def cairo_pop_group(cr: cairo_tp): cairo_pattern_tp = extern // 524
   def cairo_pop_group_to_source(cr: cairo_tp): Unit = extern // 528
+  def cairo_set_operator(cr: cairo_tp, op: cairo_operator_t): Unit = extern // 650
+  def cairo_set_source_surface(cr: cairo_tp, surface: cairo_surface_tp, x: CDouble, y: CDouble): Unit =
+    extern // 664
+  def cairo_set_tolerance(cr: cairo_tp, tolerance: CDouble): Unit = extern // 670
   def cairo_set_source(cr: cairo_tp, source: cairo_pattern_tp): Unit = extern // 653
   def cairo_set_source_rgb(cr: cairo_tp, red: CDouble, green: CDouble, blue: CDouble): Unit = extern // 655
   def cairo_set_source_rgba(cr: cairo_tp, red: CDouble, green: CDouble, blue: CDouble, alpha: CDouble): Unit =
