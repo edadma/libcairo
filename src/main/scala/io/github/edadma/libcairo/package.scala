@@ -88,6 +88,9 @@ implicit class Context private[libcairo] (val cr: lib.cairo_tp) extends AnyVal {
   def arc(x: Double, y: Double, radius: Double, angle1: Double, angle2: Double): Unit =
     lib.cairo_arc(cr, x, y, radius, angle1, angle2)
 
+  def arcNegative(x: Double, y: Double, radius: Double, angle1: Double, angle2: Double): Unit =
+    lib.cairo_arc_negative(cr, x, y, radius, angle1, angle2)
+
   def relLineTo(x: Double, y: Double): Unit = lib.cairo_rel_line_to(cr, x, y)
 
   def relCurveTo(dx1: Double, dy1: Double, dx2: Double, dy2: Double, dx3: Double, dy3: Double): Unit =
