@@ -20,6 +20,8 @@ implicit class Context private[libcairo] (val cr: lib.cairo_tp) extends AnyVal {
 
   def destroy(): Unit = lib.cairo_destroy(cr)
 
+  def newPath(): Unit = lib.cairo_new_path(cr)
+
   def getReferenceCount: Int = lib.cairo_get_reference_count(cr).toInt
 
   def save(): Unit = lib.cairo_save(cr)

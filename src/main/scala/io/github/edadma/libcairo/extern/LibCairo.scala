@@ -4,8 +4,7 @@ import scala.scalanative.unsafe._
 
 @link("cairo")
 @extern
-object LibCairo {
-
+object LibCairo:
   type cairo_surface_t = CStruct0
   type cairo_surface_tp = Ptr[cairo_surface_t]
   type cairo_status_t = CInt
@@ -215,4 +214,4 @@ object LibCairo {
 
   def cairo_matrix_transform_point(matrix: cairo_matrix_tp, x: Ptr[CDouble], y: Ptr[CDouble]): Unit = extern // 3060
 
-}
+  def cairo_new_path(cr: cairo_tp): Unit = extern
