@@ -2,7 +2,7 @@ name := "libcairo"
 
 version := "0.1.5"
 
-scalaVersion := "3.2.1"
+scalaVersion := "3.2.2"
 
 enablePlugins(ScalaNativePlugin)
 
