@@ -13,6 +13,8 @@ implicit class Surface(val surface: lib.cairo_surface_tp) {
 
   def writeToPNG(filename: String): lib.cairo_status_t =
     Zone(implicit z => lib.cairo_surface_write_to_png(surface, toCString(filename)))
+
+  def showPage(): Unit = lib.cairo_surface_show_page(surface)
 }
 
 implicit class Context private[libcairo] (val cr: lib.cairo_tp) extends AnyVal:
