@@ -225,7 +225,7 @@ def imageSurfaceCreate(format: Format, width: Int, height: Int): Surface =
 def imageSurfaceCreateFromPNG(filename: String): Surface =
   Zone(implicit z => lib.cairo_image_surface_create_from_png(toCString(filename)))
 
-def pdfSurfaceCreate(filename: String, width_in_points: Double, height_in_points: Double) =
+def pdfSurfaceCreate(filename: String, width_in_points: Double, height_in_points: Double): Surface =
   Zone(implicit z => lib.cairo_pdf_surface_create(toCString(filename), width_in_points, height_in_points))
 
 def patternCreateLinear(x0: Double, y0: Double, x1: Double, y1: Double): Pattern =
