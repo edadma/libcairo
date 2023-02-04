@@ -127,6 +127,8 @@ implicit class Context private[libcairo] (val cr: lib.cairo_tp) extends AnyVal:
   def setSourceSurface(surface: Surface, x: Double, y: Double): Unit =
     lib.cairo_set_source_surface(cr, surface.surface, x, y)
   def setTolerance(tolerance: Double): Unit = lib.cairo_set_tolerance(cr, tolerance)
+  def showPage(): Unit = lib.cairo_show_page(cr)
+end Context
 
 implicit class FontOptions private[libcairo] (val ptr: lib.cairo_font_options_tp) extends AnyVal {}
 

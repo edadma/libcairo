@@ -156,5 +156,10 @@ object LibCairo:
   def cairo_matrix_transform_point(matrix: cairo_matrix_tp, x: Ptr[CDouble], y: Ptr[CDouble]): Unit = extern // 3060
   def cairo_new_path(cr: cairo_tp): Unit = extern
   def cairo_set_line_cap(cr: cairo_tp, line_cap: cairo_line_cap_t): Unit = extern
-  def cairo_pdf_surface_create(filename: CString, width_in_points: CDouble, height_in_points: CDouble): cairo_surface_tp = extern
+  def cairo_pdf_surface_create(
+      filename: CString,
+      width_in_points: CDouble,
+      height_in_points: CDouble,
+  ): cairo_surface_tp = extern
   def cairo_surface_show_page(surface: cairo_surface_tp): Unit = extern
+  def cairo_show_page(cr: cairo_tp): Unit = extern
