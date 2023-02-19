@@ -63,6 +63,7 @@ implicit class Context private[libcairo] (val cr: lib.cairo_tp) extends AnyVal:
     lib.cairo_device_to_user_distance(cr, dxp, dyp)
     (!dxp, !dyp)
   def moveTo(x: Double, y: Double): Unit = lib.cairo_move_to(cr, x, y)
+  def relMoveTo(dx: Double, dy: Double): Unit = lib.cairo_move_to(cr, dx, dy)
   def lineTo(x: Double, y: Double): Unit = lib.cairo_line_to(cr, x, y)
   def arc(x: Double, y: Double, radius: Double, angle1: Double, angle2: Double): Unit =
     lib.cairo_arc(cr, x, y, radius, angle1, angle2)

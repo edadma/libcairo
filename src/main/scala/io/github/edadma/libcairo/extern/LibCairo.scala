@@ -57,6 +57,7 @@ object LibCairo:
   def cairo_device_to_user(cr: cairo_tp, dx: Ptr[CDouble], dy: Ptr[CDouble]): Unit = extern // 845
   def cairo_device_to_user_distance(cr: cairo_tp, dx: Ptr[CDouble], dy: Ptr[CDouble]): Unit = extern // 848
   def cairo_move_to(cr: cairo_tp, x: CDouble, y: CDouble): Unit = extern // 855
+  def cairo_rel_move_to(cr: cairo_tp, x: CDouble, y: CDouble): Unit = extern
   def cairo_line_to(cr: cairo_tp, x: CDouble, y: CDouble): Unit = extern // 861
   def cairo_arc(cr: cairo_tp, x: CDouble, y: CDouble, radius: CDouble, angle1: CDouble, angle2: CDouble): Unit =
     extern // 870
