@@ -1,6 +1,6 @@
 name := "libcairo"
 
-version := "0.1.8"
+version := "0.1.9"
 
 scalaVersion := "3.2.2"
 
