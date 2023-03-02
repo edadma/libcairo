@@ -76,7 +76,7 @@ implicit class Context private[libcairo] (val cr: lib.cairo_tp) extends AnyVal:
   def relCurveTo(dx1: Double, dy1: Double, dx2: Double, dy2: Double, dx3: Double, dy3: Double): Unit =
     lib.cairo_rel_curve_to(cr, dx1, dy1, dx2, dy2, dx3, dy3)
 
-  def rectangle(x: CDouble, y: CDouble, width: CDouble, height: CDouble): Unit =
+  def rectangle(x: Double, y: Double, width: Double, height: Double): Unit =
     lib.cairo_rectangle(cr, x, y, width, height)
 
   def closePath(): Unit = lib.cairo_close_path(cr)
