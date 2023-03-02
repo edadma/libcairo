@@ -2,6 +2,8 @@ package io.github.edadma.libcairo.extern
 
 import scala.scalanative.unsafe._
 
+import io.github.edadma.freetype.extern.LibFreeType.FT_Face
+
 @link("cairo")
 @extern
 object LibCairo:
@@ -29,6 +31,8 @@ object LibCairo:
   type cairo_operator_t = CInt
   type cairo_antialias_t = CInt
   type cairo_fill_rule_t = CInt
+  type cairo_font_face_t = CStruct0
+  type cairo_font_face_tp = Ptr[cairo_font_face_t]
 
   def cairo_create(target: cairo_surface_tp): cairo_tp = extern // 491
   def cairo_reference(cr: cairo_tp): cairo_tp = extern // 494
@@ -164,3 +168,5 @@ object LibCairo:
   ): cairo_surface_tp = extern
   def cairo_surface_show_page(surface: cairo_surface_tp): Unit = extern
   def cairo_show_page(cr: cairo_tp): Unit = extern
+  def cairo_ft_font_face_create_for_ft_face(face: FT_Face, load_flags: CInt): cairo_font_face_tp = extern
+  def cairo_set_font_face(cr: cairo_tp, font_face: cairo_font_face_tp): Unit = extern

@@ -1,10 +1,13 @@
 package io.github.edadma.libcairo
 
-import scala.scalanative.unsafe._
-import scala.scalanative.unsigned._
-import scala.scalanative.libc.stdlib._
+import io.github.edadma.freetype.extern.LibFreeType.FT_Face
+import io.github.edadma.freetype.Face
 
-import io.github.edadma.libcairo.extern.{LibCairo => lib}
+import scala.scalanative.unsafe.*
+import scala.scalanative.unsigned.*
+import scala.scalanative.libc.stdlib.*
+import io.github.edadma.libcairo.extern.LibCairo as lib
+import io.github.edadma.libcairo.extern.LibCairo.cairo_font_face_tp
 
 implicit class Surface(val surface: lib.cairo_surface_tp) {
   def create: Context = lib.cairo_create(surface)
@@ -129,6 +132,7 @@ implicit class Context private[libcairo] (val cr: lib.cairo_tp) extends AnyVal:
     lib.cairo_set_source_surface(cr, surface.surface, x, y)
   def setTolerance(tolerance: Double): Unit = lib.cairo_set_tolerance(cr, tolerance)
   def showPage(): Unit = lib.cairo_show_page(cr)
+  def setFontFace(font_face: FontFace): Unit = lib.cairo_set_font_face(cr, font_face.fontfaceptr)
 end Context
 
 implicit class FontOptions private[libcairo] (val ptr: lib.cairo_font_options_tp) extends AnyVal {}
@@ -539,3 +543,8 @@ object RegionOverlap {
   final val OUT = new RegionOverlap(1)
   final val PART = new RegionOverlap(2)
 }
+
+def fontFaceCreateForFTFace(face: FT_Face, load_flags: Int): FontFace =
+  lib.cairo_ft_font_face_create_for_ft_face(face.faceptr, load_flags)
+
+implicit class FontFace private[libcairo] (val fontfaceptr: lib.cairo_font_face_tp) extends AnyVal

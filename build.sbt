@@ -1,6 +1,6 @@
 name := "libcairo"
 
-version := "0.1.8"
+version := "0.1.10"
 
 scalaVersion := "3.2.2"
 
@@ -32,6 +32,8 @@ Global / onChangedBuildSource := ReloadOnSourceChanges
 resolvers += "Typesafe Repository" at "https://repo.typesafe.com/typesafe/releases/"
 
 resolvers += Resolver.githubPackages("edadma")
+
+libraryDependencies += "io.github.edadma" %%% "freetype" % "0.0.1"
 
 licenses := Seq("ISC" -> url("https://opensource.org/licenses/ISC"))
 
