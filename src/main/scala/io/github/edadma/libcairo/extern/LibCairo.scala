@@ -2,7 +2,7 @@ package io.github.edadma.libcairo.extern
 
 import scala.scalanative.unsafe._
 
-import io.github.edadma.freetype.extern.LibFreeType.FT_Face
+import io.github.edadma.freetype_face.FT_Face
 
 @link("cairo")
 @extern

@@ -1,6 +1,6 @@
 package io.github.edadma.libcairo
 
-import io.github.edadma.freetype.extern.LibFreeType.FT_Face
+import io.github.edadma.freetype_face.FT_Face
 
 import scala.scalanative.unsafe.*
 import scala.scalanative.unsigned.*
