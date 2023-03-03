@@ -1,7 +1,6 @@
 package io.github.edadma.libcairo
 
 import io.github.edadma.freetype.extern.LibFreeType.FT_Face
-import io.github.edadma.freetype.Face
 
 import scala.scalanative.unsafe.*
 import scala.scalanative.unsigned.*
@@ -545,6 +544,6 @@ object RegionOverlap {
 }
 
 def fontFaceCreateForFTFace(face: FT_Face, load_flags: Int): FontFace =
-  lib.cairo_ft_font_face_create_for_ft_face(face.faceptr, load_flags)
+  lib.cairo_ft_font_face_create_for_ft_face(face, load_flags)
 
 implicit class FontFace private[libcairo] (val fontfaceptr: lib.cairo_font_face_tp) extends AnyVal

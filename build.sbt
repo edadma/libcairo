@@ -1,6 +1,6 @@
 name := "libcairo"
 
-version := "0.1.10"
+version := "0.0.1"
 
 scalaVersion := "3.2.2"
 
@@ -33,7 +33,8 @@ resolvers += "Typesafe Repository" at "https://repo.typesafe.com/typesafe/releas
 
 resolvers += Resolver.githubPackages("edadma")
 
-libraryDependencies += "io.github.edadma" %%% "freetype" % "0.0.1"
+//libraryDependencies += "io.github.edadma" %%% "freetype" % "0.0.1"
+libraryDependencies += "io.github.edadma" %%% "freetype_face" % "0.0.1"
 
 licenses := Seq("ISC" -> url("https://opensource.org/licenses/ISC"))
 
