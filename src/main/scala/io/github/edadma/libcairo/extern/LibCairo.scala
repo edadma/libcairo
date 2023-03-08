@@ -170,3 +170,4 @@ object LibCairo:
   def cairo_show_page(cr: cairo_tp): Unit = extern
   def cairo_ft_font_face_create_for_ft_face(face: FT_Face, load_flags: CInt): cairo_font_face_tp = extern
   def cairo_set_font_face(cr: cairo_tp, font_face: cairo_font_face_tp): Unit = extern
+  def cairo_new_sub_path(cr: cairo_tp): Unit = extern

@@ -132,6 +132,7 @@ implicit class Context private[libcairo] (val cr: lib.cairo_tp) extends AnyVal:
   def setTolerance(tolerance: Double): Unit = lib.cairo_set_tolerance(cr, tolerance)
   def showPage(): Unit = lib.cairo_show_page(cr)
   def setFontFace(font_face: FontFace): Unit = lib.cairo_set_font_face(cr, font_face.fontfaceptr)
+  def newSubPath(): Unit = lib.cairo_new_sub_path(cr)
 end Context
 
 implicit class FontOptions private[libcairo] (val ptr: lib.cairo_font_options_tp) extends AnyVal {}
