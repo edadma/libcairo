@@ -149,6 +149,7 @@ implicit class Context private[libcairo] (val cr: lib.cairo_tp) extends AnyVal:
 
     lib.cairo_fill_extents(cr, x1, y1, x2, y2)
     (!x1, !y1, !x2, !y2)
+  def newSubPath(): Unit = lib.cairo_new_sub_path(cr)
 end Context
 
 implicit class FontOptions private[libcairo] (val ptr: lib.cairo_font_options_tp) extends AnyVal {}

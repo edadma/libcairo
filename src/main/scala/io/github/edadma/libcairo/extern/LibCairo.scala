@@ -174,3 +174,4 @@ object LibCairo:
     extern
   def cairo_fill_extents(cr: cairo_tp, x1: Ptr[CDouble], y1: Ptr[CDouble], x2: Ptr[CDouble], y2: Ptr[CDouble]): Unit =
     extern
+  def cairo_new_sub_path(cr: cairo_tp): Unit = extern
