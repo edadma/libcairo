@@ -78,7 +78,7 @@ implicit class Context private[libcairo] (val cr: lib.cairo_tp) extends AnyVal:
     lib.cairo_rectangle(cr, x, y, width, height)
 
   def closePath(): Unit = lib.cairo_close_path(cr)
-
+``
   def paint(): Unit = lib.cairo_paint(cr)
 
   def paintWithAlpha(alpha: Double): Unit = lib.cairo_paint_with_alpha(cr, alpha)
