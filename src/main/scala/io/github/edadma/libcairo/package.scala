@@ -8,15 +8,20 @@ import scala.scalanative.libc.stdlib.*
 import io.github.edadma.libcairo.extern.LibCairo as lib
 import io.github.edadma.libcairo.extern.LibCairo.cairo_font_face_tp
 
-implicit class Surface(val surface: lib.cairo_surface_tp) {
+implicit class Surface(val surface: lib.cairo_surface_tp):
   def create: Context = lib.cairo_create(surface)
+
   def destroy(): Unit = lib.cairo_surface_destroy(surface)
+
   def writeToPNG(filename: String): lib.cairo_status_t =
     Zone(implicit z => lib.cairo_surface_write_to_png(surface, toCString(filename)))
+
   def showPage(): Unit = lib.cairo_surface_show_page(surface)
+
   def getWidth: Int = lib.cairo_image_surface_get_width(surface)
+
   def getHeight: Int = lib.cairo_image_surface_get_height(surface)
-}
+end Surface
 
 implicit class Context private[libcairo] (val cr: lib.cairo_tp) extends AnyVal:
   def reference: Context = lib.cairo_reference(cr)
@@ -47,6 +52,7 @@ implicit class Context private[libcairo] (val cr: lib.cairo_tp) extends AnyVal:
   def translate(tx: Double, ty: Double): Unit = lib.cairo_translate(cr, tx, ty)
   def scale(sx: Double, sy: Double): Unit = lib.cairo_scale(cr, sx, sy)
   def rotate(angle: Double): Unit = lib.cairo_rotate(cr, angle)
+  def identityMatrix(): Unit = lib.cairo_identity_matrix(cr)
   def deviceToUser(dx: Double, dy: Double): (Double, Double) =
     val dxp = stackalloc[CDouble]()
     val dyp = stackalloc[CDouble]()
@@ -78,7 +84,7 @@ implicit class Context private[libcairo] (val cr: lib.cairo_tp) extends AnyVal:
     lib.cairo_rectangle(cr, x, y, width, height)
 
   def closePath(): Unit = lib.cairo_close_path(cr)
-``
+
   def paint(): Unit = lib.cairo_paint(cr)
 
   def paintWithAlpha(alpha: Double): Unit = lib.cairo_paint_with_alpha(cr, alpha)
