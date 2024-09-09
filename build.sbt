@@ -2,6 +2,8 @@ name := "libcairo"
 
 version := "0.0.7"
 
+versionScheme := Some("early-semver")
+
 scalaVersion := "3.5.0"
 
 enablePlugins(ScalaNativePlugin)
