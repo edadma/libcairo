@@ -14,7 +14,7 @@ implicit class Surface(val surface: lib.cairo_surface_tp):
   def destroy(): Unit = lib.cairo_surface_destroy(surface)
 
   def writeToPNG(filename: String): lib.cairo_status_t =
-    Zone(implicit z => lib.cairo_surface_write_to_png(surface, toCString(filename)))
+    Zone { lib.cairo_surface_write_to_png(surface, toCString(filename)) }
 
   def showPage(): Unit = lib.cairo_surface_show_page(surface)
 
@@ -114,14 +114,14 @@ implicit class Context private[libcairo] (val cr: lib.cairo_tp) extends AnyVal:
   def clip(): Unit = lib.cairo_clip(cr)
 
   def selectFontFace(family: String, slant: FontSlant, weight: FontWeight): Unit =
-    Zone(implicit z => lib.cairo_select_font_face(cr, toCString(family), slant.value, weight.value))
+    Zone { lib.cairo_select_font_face(cr, toCString(family), slant.value, weight.value) }
 
   def setFontSize(size: Double): Unit = lib.cairo_set_font_size(cr, size)
   def setFontOptions(options: FontOptions): Unit = lib.cairo_set_font_options(cr, options.ptr)
   def getFontOptions(options: FontOptions): Unit = lib.cairo_get_font_options(cr, options.ptr)
-  def showText(utf8: String): Unit = Zone(implicit z => lib.cairo_show_text(cr, toCString(utf8)))
-  def textPath(utf8: String): Unit = Zone(implicit z => lib.cairo_text_path(cr, toCString(utf8)))
-  def textExtents(utf8: String): TextExtents = Zone { implicit z =>
+  def showText(utf8: String): Unit = Zone { lib.cairo_show_text(cr, toCString(utf8)) }
+  def textPath(utf8: String): Unit = Zone { lib.cairo_text_path(cr, toCString(utf8)) }
+  def textExtents(utf8: String): TextExtents = Zone {
     val extents: TextExtentsOps = stackalloc[lib.cairo_text_extents_t]()
 
     lib.cairo_text_extents(cr, toCString(utf8), extents.ptr)
@@ -250,10 +250,10 @@ def imageSurfaceCreate(format: Format, width: Int, height: Int): Surface =
   lib.cairo_image_surface_create(format.value, width, height)
 
 def imageSurfaceCreateFromPNG(filename: String): Surface =
-  Zone(implicit z => lib.cairo_image_surface_create_from_png(toCString(filename)))
+  Zone { lib.cairo_image_surface_create_from_png(toCString(filename)) }
 
 def pdfSurfaceCreate(filename: String, width_in_points: Double, height_in_points: Double): Surface =
-  Zone(implicit z => lib.cairo_pdf_surface_create(toCString(filename), width_in_points, height_in_points))
+  Zone { lib.cairo_pdf_surface_create(toCString(filename), width_in_points, height_in_points) }
 
 def patternCreateLinear(x0: Double, y0: Double, x1: Double, y1: Double): Pattern =
   lib.cairo_pattern_create_linear(x0, y0, x1, y1)

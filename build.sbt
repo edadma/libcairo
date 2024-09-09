@@ -1,16 +1,10 @@
 name := "libcairo"
 
-version := "0.0.6"
+version := "0.0.7"
 
-scalaVersion := "3.2.2"
+scalaVersion := "3.5.0"
 
 enablePlugins(ScalaNativePlugin)
-
-nativeLinkStubs := true
-
-nativeMode := "debug"
-
-nativeLinkingOptions := Seq(s"-L${baseDirectory.value}/native-lib")
 
 scalacOptions ++= Seq(
   "-deprecation",
@@ -34,7 +28,7 @@ resolvers += "Typesafe Repository" at "https://repo.typesafe.com/typesafe/releas
 resolvers += Resolver.githubPackages("edadma")
 
 //libraryDependencies += "io.github.edadma" %%% "freetype" % "0.0.1"
-libraryDependencies += "io.github.edadma" %%% "freetype_face" % "0.0.1"
+libraryDependencies += "io.github.edadma" %%% "freetype_face" % "0.0.2"
 
 licenses := Seq("ISC" -> url("https://opensource.org/licenses/ISC"))
 
