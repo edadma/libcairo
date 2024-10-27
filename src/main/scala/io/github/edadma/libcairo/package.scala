@@ -137,6 +137,7 @@ implicit class Context private[libcairo] (val cr: lib.cairo_tp) extends AnyVal:
   def setTolerance(tolerance: Double): Unit = lib.cairo_set_tolerance(cr, tolerance)
   def showPage(): Unit = lib.cairo_show_page(cr)
   def setFontFace(font_face: FontFace): Unit = lib.cairo_set_font_face(cr, font_face.fontfaceptr)
+  def setScaledFont()
   def pathExtents: (Double, Double, Double, Double) =
     val x1 = stackalloc[CDouble]()
     val y1 = stackalloc[CDouble]()
