@@ -1,6 +1,6 @@
 name := "libcairo"
 
-version := "0.0.7"
+version := "0.0.8"
 
 versionScheme := Some("early-semver")
 
