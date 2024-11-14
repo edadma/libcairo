@@ -175,6 +175,7 @@ object LibCairo:
   def cairo_set_font_face(cr: cairo_tp, font_face: cairo_font_face_tp): Unit                     = extern
   def cairo_set_scaled_font(cr: cairo_tp, scaled_font: cairo_scaled_font_tp): Unit               = extern
   def cairo_get_scaled_font(cr: cairo_tp): cairo_scaled_font_tp                                  = extern
+  def cairo_scaled_font_reference(scaled_font: cairo_scaled_font_tp): cairo_scaled_font_tp       = extern
   def cairo_path_extents(cr: cairo_tp, x1: Ptr[CDouble], y1: Ptr[CDouble], x2: Ptr[CDouble], y2: Ptr[CDouble]): Unit =
     extern
   def cairo_fill_extents(cr: cairo_tp, x1: Ptr[CDouble], y1: Ptr[CDouble], x2: Ptr[CDouble], y2: Ptr[CDouble]): Unit =

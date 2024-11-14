@@ -573,4 +573,5 @@ def fontFaceCreateForFTFace(face: FT_Face, load_flags: Int): FontFace =
 
 implicit class FontFace private[libcairo] (val fontfaceptr: lib.cairo_font_face_tp) extends AnyVal
 
-implicit class ScaledFont private[libcairo] (val scaledfontptr: lib.cairo_scaled_font_tp) extends AnyVal
+implicit class ScaledFont private[libcairo] (val scaledfontptr: lib.cairo_scaled_font_tp) extends AnyVal:
+  def reference: ScaledFont = lib.cairo_scaled_font_reference(scaledfontptr)
