@@ -10,18 +10,13 @@ import io.github.edadma.libcairo.extern.LibCairo.cairo_font_face_tp
 
 implicit class Surface(val surface: lib.cairo_surface_tp):
   def create: Context = lib.cairo_create(surface)
-
   def destroy(): Unit = lib.cairo_surface_destroy(surface)
-
   def writeToPNG(filename: String): lib.cairo_status_t =
     Zone { lib.cairo_surface_write_to_png(surface, toCString(filename)) }
-
-  def showPage(): Unit = lib.cairo_surface_show_page(surface)
-
-  def getWidth: Int = lib.cairo_image_surface_get_width(surface)
-
-  def getHeight: Int = lib.cairo_image_surface_get_height(surface)
-end Surface
+  def showPage(): Unit   = lib.cairo_surface_show_page(surface)
+  def getWidth: Int      = lib.cairo_image_surface_get_width(surface)
+  def getHeight: Int     = lib.cairo_image_surface_get_height(surface)
+  def reference: Surface = lib.cairo_surface_reference(surface)
 
 implicit class Context private[libcairo] (val cr: lib.cairo_tp) extends AnyVal:
   def reference: Context                           = lib.cairo_reference(cr)
