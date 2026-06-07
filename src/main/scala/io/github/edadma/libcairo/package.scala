@@ -34,6 +34,14 @@ implicit class Surface(val surface: lib.cairo_surface_tp):
     * [[Context]]. */
   def flush(): Unit = lib.cairo_surface_flush(surface)
 
+  /** Tell Cairo the pixel buffer was modified directly (through [[getData]]) outside of any
+    * [[Context]] drawing. This invalidates Cairo's internal snapshots so the next operation
+    * that uses the surface — as a source via [[Context.setSourceSurface]], for instance —
+    * sees the new pixels rather than a stale cached copy. Pair it with [[flush]]: `flush`
+    * before reading or writing the buffer, `markDirty` after writing, before drawing with the
+    * surface again. */
+  def markDirty(): Unit = lib.cairo_surface_mark_dirty(surface)
+
   def reference: Surface = lib.cairo_surface_reference(surface)
 
 implicit class Context private[libcairo] (val cr: lib.cairo_tp) extends AnyVal:

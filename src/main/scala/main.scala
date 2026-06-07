@@ -44,6 +44,37 @@ import scala.scalanative.unsafe.*
   val a = data(3) & 0xff
   println(s"pixel(0,0) = b:$b g:$g r:$r a:$a")
 
+  // Write the buffer directly, then mark it dirty so a later Cairo operation sees the new
+  // pixels rather than a stale snapshot — the path a software blur (e.g. a drop-shadow pass)
+  // takes: draw a shape, read the buffer, convolve it, write it back, mark dirty, reuse the
+  // surface as a source. Paint an opaque blue 10x10 block at the top-left (premultiplied
+  // ARGB32 is b,g,r,a per pixel in native-endian order).
+  var y = 0
+  while y < 10 do
+    var x = 0
+    while x < 10 do
+      val o = y * stride + x * 4
+      data(o) = 255.toByte     // blue
+      data(o + 1) = 0.toByte   // green
+      data(o + 2) = 0.toByte   // red
+      data(o + 3) = 255.toByte // alpha
+      x += 1
+    y += 1
+  surface.markDirty()
+
+  // Composite the modified surface onto a fresh one as a source. Without markDirty above this
+  // could sample the pre-write snapshot; with it, the destination's top-left is the blue block.
+  val dest = imageSurfaceCreate(Format.ARGB32, 120, 120)
+  val dcr  = dest.create
+  dcr.setSourceSurface(surface, 0, 0)
+  dcr.paint()
+  dest.flush()
+  val ddata = dest.getData
+  println(s"after markDirty, dest pixel(0,0) = b:${ddata(0) & 0xff} g:${ddata(1) & 0xff} r:${ddata(2) & 0xff} a:${ddata(3) & 0xff}")
+  dest.writeToPNG("markdirty.png")
+
+  dcr.destroy()
+  dest.destroy()
   cr.destroy()
   surface.destroy()
 

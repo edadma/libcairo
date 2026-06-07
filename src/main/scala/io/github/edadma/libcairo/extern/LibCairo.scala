@@ -186,4 +186,5 @@ object LibCairo:
   def cairo_image_surface_get_data(surface: cairo_surface_tp): Ptr[Byte]   = extern
   def cairo_image_surface_get_stride(surface: cairo_surface_tp): CInt      = extern
   def cairo_surface_flush(surface: cairo_surface_tp): Unit                 = extern
+  def cairo_surface_mark_dirty(surface: cairo_surface_tp): Unit            = extern
   def cairo_surface_reference(surface: cairo_surface_tp): cairo_surface_tp = extern
