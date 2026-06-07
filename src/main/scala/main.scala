@@ -1,5 +1,7 @@
 import io.github.edadma.libcairo._
 
+import scala.scalanative.unsafe.*
+
 @main def run(): Unit =
   val surface = imageSurfaceCreate(Format.ARGB32, 120, 120)
   val cr = surface.create
@@ -27,6 +29,20 @@ import io.github.edadma.libcairo._
   cr.fill()
 
   surface.writeToPNG("setsourcergba.png")
+
+  // Read the rendered pixels back out — the buffer-access API a windowing layer needs to
+  // blit a Cairo image surface to the screen. After flushing, getData points at the
+  // premultiplied ARGB32 buffer laid out in rows of getStride bytes.
+  surface.flush()
+  val data   = surface.getData
+  val stride = surface.getStride
+  println(s"image surface: ${surface.getWidth}x${surface.getHeight}, stride=$stride bytes/row")
+  // The top-left pixel sits in the red quadrant; print its BGRA bytes (native-endian ARGB).
+  val b = data(0) & 0xff
+  val g = data(1) & 0xff
+  val r = data(2) & 0xff
+  val a = data(3) & 0xff
+  println(s"pixel(0,0) = b:$b g:$g r:$r a:$a")
 
   cr.destroy()
   surface.destroy()

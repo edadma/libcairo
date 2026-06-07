@@ -16,6 +16,24 @@ implicit class Surface(val surface: lib.cairo_surface_tp):
   def showPage(): Unit   = lib.cairo_surface_show_page(surface)
   def getWidth: Int      = lib.cairo_image_surface_get_width(surface)
   def getHeight: Int     = lib.cairo_image_surface_get_height(surface)
+
+  /** A pointer to the surface's pixel buffer. For a [[Format.ARGB32]] surface each pixel
+    * is a native-endian 32-bit `0xAARRGGBB` with premultiplied alpha, packed in rows of
+    * [[getStride]] bytes. Call [[flush]] before reading after drawing through a context,
+    * and do not draw to the surface again until done reading. Valid for the surface's
+    * lifetime. */
+  def getData: Ptr[Byte] = lib.cairo_image_surface_get_data(surface)
+
+  /** The number of bytes between the start of consecutive rows in [[getData]]. Cairo pads
+    * rows for alignment, so this can exceed `width * 4` — always stride a row by this, not
+    * by the pixel width. */
+  def getStride: Int = lib.cairo_image_surface_get_stride(surface)
+
+  /** Flush any pending drawing so the pixel buffer reflects every prior operation. Must be
+    * called before reading [[getData]] when the surface has been drawn to through a
+    * [[Context]]. */
+  def flush(): Unit = lib.cairo_surface_flush(surface)
+
   def reference: Surface = lib.cairo_surface_reference(surface)
 
 implicit class Context private[libcairo] (val cr: lib.cairo_tp) extends AnyVal:
