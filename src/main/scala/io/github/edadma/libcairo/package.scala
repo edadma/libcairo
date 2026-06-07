@@ -272,6 +272,23 @@ implicit class Matrix private[libcairo] (val matrix: lib.cairo_matrix_tp) extend
 def imageSurfaceCreate(format: Format, width: Int, height: Int): Surface =
   lib.cairo_image_surface_create(format.value, width, height)
 
+/** Wrap an existing pixel buffer as an image surface — no copy. `data` must point at
+  * `height * stride` bytes laid out for `format` (for [[Format.ARGB32]], native-endian
+  * premultiplied `0xAARRGGBB`), and must stay alive and unchanged for the surface's whole
+  * lifetime — Cairo reads and writes it in place. `stride` is the row pitch in bytes; use
+  * [[formatStrideForWidth]] to compute a valid one (Cairo requires a specific alignment). This
+  * is the entry point for compositing a buffer produced elsewhere — a decoded image, or another
+  * renderer's output — through Cairo. */
+def imageSurfaceCreateForData(data: Ptr[Byte], format: Format, width: Int, height: Int, stride: Int): Surface =
+  lib.cairo_image_surface_create_for_data(data, format.value, width, height, stride)
+
+/** The row pitch, in bytes, Cairo requires for an image of `width` pixels in `format` — at
+  * least `width` times the pixel size, rounded up to Cairo's alignment. Size a buffer for
+  * [[imageSurfaceCreateForData]] as `height * formatStrideForWidth(format, width)`. Returns a
+  * negative value if the width is too large to be represented. */
+def formatStrideForWidth(format: Format, width: Int): Int =
+  lib.cairo_format_stride_for_width(format.value, width)
+
 def imageSurfaceCreateFromPNG(filename: String): Surface =
   Zone { lib.cairo_image_surface_create_from_png(toCString(filename)) }
 

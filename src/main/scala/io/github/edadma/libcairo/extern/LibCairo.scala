@@ -115,6 +115,8 @@ object LibCairo:
   def cairo_surface_destroy(surface: cairo_surface_tp): Unit                                            = extern // 2334
   def cairo_surface_write_to_png(surface: cairo_surface_tp, filename: CString): cairo_status_t          = extern // 2433
   def cairo_image_surface_create(format: cairo_format_t, width: CInt, height: CInt): cairo_surface_tp   = extern // 2544
+  def cairo_image_surface_create_for_data(data: Ptr[Byte], format: cairo_format_t, width: CInt, height: CInt, stride: CInt): cairo_surface_tp = extern
+  def cairo_format_stride_for_width(format: cairo_format_t, width: CInt): CInt                          = extern
   def cairo_image_surface_create_from_png(filename: CString): cairo_surface_tp                          = extern // 2577
   def cairo_pattern_create_linear(x0: CDouble, y0: CDouble, x1: CDouble, y1: CDouble): cairo_pattern_tp = extern // 2760
   def cairo_pattern_create_radial(

@@ -73,6 +73,30 @@ import scala.scalanative.unsafe.*
   println(s"after markDirty, dest pixel(0,0) = b:${ddata(0) & 0xff} g:${ddata(1) & 0xff} r:${ddata(2) & 0xff} a:${ddata(3) & 0xff}")
   dest.writeToPNG("markdirty.png")
 
+  // Wrap a pixel buffer we own as a surface with no copy — the path for compositing externally
+  // produced pixels (a decoded image, or another renderer's output) through Cairo. The stride
+  // comes from formatStrideForWidth so it meets Cairo's alignment.
+  val ew      = 8
+  val eh      = 8
+  val estride = formatStrideForWidth(Format.ARGB32, ew)
+  val ebuf    = stackalloc[Byte](eh * estride)
+  var ey      = 0
+  while ey < eh do
+    var ex = 0
+    while ex < ew do
+      val eo = ey * estride + ex * 4
+      ebuf(eo) = 255.toByte     // blue
+      ebuf(eo + 1) = 0.toByte   // green
+      ebuf(eo + 2) = 255.toByte // red
+      ebuf(eo + 3) = 255.toByte // alpha (opaque magenta)
+      ex += 1
+    ey += 1
+  val wrapped = imageSurfaceCreateForData(ebuf, Format.ARGB32, ew, eh, estride)
+  wrapped.flush()
+  println(s"create_for_data: ${wrapped.getWidth}x${wrapped.getHeight}, stride=${wrapped.getStride} bytes/row (computed $estride)")
+  wrapped.writeToPNG("createfordata.png")
+  wrapped.destroy()
+
   dcr.destroy()
   dest.destroy()
   cr.destroy()
