@@ -1,7 +1,11 @@
 libcairo
 ========
 
-![GitHub release (latest by date including pre-releases)](https://img.shields.io/github/v/release/edadma/libcairo?include_prereleases) ![GitHub (Pre-)Release Date](https://img.shields.io/github/release-date-pre/edadma/libcairo) ![GitHub last commit](https://img.shields.io/github/last-commit/edadma/libcairo) ![GitHub](https://img.shields.io/github/license/edadma/libcairo)
+![Maven Central](https://img.shields.io/maven-central/v/io.github.edadma/libcairo_native0.5_3)
+[![Last Commit](https://img.shields.io/github/last-commit/edadma/libcairo)](https://github.com/edadma/libcairo/commits)
+![License](https://img.shields.io/github/license/edadma/libcairo)
+![Scala Version](https://img.shields.io/badge/Scala-3.8.4-blue.svg)
+![Scala Native Version](https://img.shields.io/badge/Scala_Native-0.5.12-blue.svg)
 
 *libcairo* provides Scala Native bindings for the [Cairo](https://www.cairographics.org/) 2D graphics C library.
 
@@ -22,33 +26,30 @@ Scala facade. Consequently, you never have to worry about memory allocation or t
 Usage
 -----
 
-To use this library, `libcairo2-dev` needs to be installed:
+This library is published for **Scala Native** to Maven Central. Cairo's C library must be
+installed on your system:
 
 ```shell
-sudo apt install libcairo2-dev
+brew install cairo              # macOS (Homebrew)
+sudo apt install libcairo2-dev  # Debian / Ubuntu
 ```
 
-Include the following in your `project/plugins.sbt`:
+Enable Scala Native in `project/plugins.sbt`:
 
 ```sbt
-addSbtPlugin("com.codecommit" % "sbt-github-packages" % "0.5.3")
-
+addSbtPlugin("org.scala-native" % "sbt-scala-native" % "0.5.12")
 ```
 
-Include the following in your `build.sbt`:
+Add the dependency in `build.sbt`:
 
 ```sbt
-resolvers += Resolver.githubPackages("edadma")
-
-libraryDependencies += "io.github.edadma" %%% "libcairo" % "0.1.5"
-
+libraryDependencies += "io.github.edadma" %%% "libcairo" % "0.0.4"
 ```
 
-Use the following `import` in your code:
+Then import the facade:
 
 ```scala
 import io.github.edadma.libcairo._
-
 ```
 
 Examples
