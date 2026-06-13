@@ -97,10 +97,112 @@ import scala.scalanative.unsafe.*
   wrapped.writeToPNG("createfordata.png")
   wrapped.destroy()
 
+  // Encode the surface to PNG entirely in memory, then decode it back — no temp file. The
+  // round trip exercises the stream callbacks plus getFormat and the surface status check.
+  val png = surface.writeToPNGBytes
+  println(s"writeToPNGBytes: ${png.length} bytes, signature ${png.take(4).map(b => f"${b & 0xff}%02x").mkString(" ")}")
+  val decoded = imageSurfaceCreateFromPNGBytes(png)
+  println(
+    s"decoded: status='${decoded.status.message}', ${decoded.getWidth}x${decoded.getHeight}, " +
+      s"ARGB32=${decoded.getFormat == Format.ARGB32}",
+  )
+  decoded.destroy()
+
+  // New context state accessors and hit testing.
+  cr.identityMatrix()
+  cr.setFillRule(FillRule.EVEN_ODD)
+  cr.rectangle(10, 10, 50, 50)
+  println(
+    s"fillRule even-odd=${cr.getFillRule == FillRule.EVEN_ODD}, lineWidth=${cr.getLineWidth}, " +
+      s"inFill(20,20)=${cr.inFill(20, 20)}, inFill(80,80)=${cr.inFill(80, 80)}",
+  )
+  cr.newPath()
+  cr.moveTo(0, 0)
+  cr.curveTo(20, 40, 60, 40, 80, 0)
+  println(s"after curveTo, currentPoint=${cr.getCurrentPoint}, hasCurrentPoint=${cr.hasCurrentPoint}")
+  cr.newPath()
+
+  // A surface used as a tiling pattern.
+  val tile = patternCreateForSurface(surface)
+  tile.setExtend(Extend.REPEAT)
+  println(s"surface pattern: status='${tile.status.message}', repeat=${tile.getExtend == Extend.REPEAT}")
+  tile.destroy()
+
   dcr.destroy()
   dest.destroy()
   cr.destroy()
   surface.destroy()
+
+  // Tagged PDF: document metadata, logical structure for accessibility, named destinations,
+  // live hyperlinks, an outline (the viewer's bookmark sidebar), and page labels.
+  val pdf = pdfSurfaceCreate("tagged.pdf", 612, 792)
+
+  pdf.restrictToVersion(PdfVersion.V1_7)
+  pdf.setMetadata(PdfMetadata.TITLE, "libcairo tagged-PDF demo")
+  pdf.setMetadata(PdfMetadata.AUTHOR, "Edward A. Maxedon, Sr.")
+  pdf.setMetadata(PdfMetadata.SUBJECT, "cairo_tag_begin/end and the PDF metadata API from Scala Native")
+  pdf.setMetadata(PdfMetadata.KEYWORDS, "cairo, scala-native, tagged pdf")
+  pdf.setMetadata(PdfMetadata.CREATE_DATE, "2026-06-12T00:00:00Z")
+  pdf.setCustomMetadata("Generator-Notes", "produced by the libcairo demo")
+
+  val pcr = pdf.create
+
+  pcr.tagBegin("Document", "")
+
+  // Page 1 — labelled "Cover". A named destination marks the heading so the outline and the
+  // page-2 link can jump back to it.
+  pdf.setPageLabel("Cover")
+  pcr.tagBegin(Tags.DEST, "name='top' x=72 y=72")
+  pcr.tagEnd(Tags.DEST)
+
+  pcr.tagBegin("H1", "")
+  pcr.selectFontFace("Georgia", FontSlant.NORMAL, FontWeight.BOLD)
+  pcr.setFontSize(24)
+  pcr.setSourceRGB(0, 0, 0)
+  pcr.moveTo(72, 100)
+  pcr.showText("Tagged PDF from Scala Native")
+  pcr.tagEnd("H1")
+
+  pcr.tagBegin("P", "")
+  pcr.selectFontFace("Georgia", FontSlant.NORMAL, FontWeight.NORMAL)
+  pcr.setFontSize(12)
+  pcr.moveTo(72, 140)
+  pcr.showText("This document has logical structure, an outline, page labels, and live links.")
+  pcr.tagEnd("P")
+
+  pcr.tagBegin(Tags.LINK, "uri='https://github.com/edadma/libcairo'")
+  pcr.setSourceRGB(0, 0, 0.8)
+  pcr.moveTo(72, 170)
+  pcr.showText("github.com/edadma/libcairo")
+  pcr.tagEnd(Tags.LINK)
+
+  pcr.showPage()
+
+  // Page 2 — labelled "1". An internal link jumps back to the destination on the cover.
+  pdf.setPageLabel("1")
+  pcr.tagBegin("P", "")
+  pcr.setSourceRGB(0, 0, 0)
+  pcr.moveTo(72, 100)
+  pcr.showText("Second page.")
+  pcr.tagEnd("P")
+
+  pcr.tagBegin(Tags.LINK, "dest='top'")
+  pcr.setSourceRGB(0, 0, 0.8)
+  pcr.moveTo(72, 130)
+  pcr.showText("Back to the top")
+  pcr.tagEnd(Tags.LINK)
+
+  pcr.tagEnd("Document")
+
+  val chapter = pdf.addOutline(PdfOutline.ROOT, "Cover", "dest='top'", PdfOutlineFlags.OPEN | PdfOutlineFlags.BOLD)
+
+  pdf.addOutline(chapter, "Second page", "page=2 pos=[72 100]", PdfOutlineFlags.NONE)
+
+  println(s"tagged.pdf context status: '${pcr.status.message}'")
+  pcr.destroy()
+  pdf.finish()
+  println(s"tagged.pdf surface status: '${pdf.status.message}'")
+  pdf.destroy()
 
 //import io.github.edadma.libcairo._
 //

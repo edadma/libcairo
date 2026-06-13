@@ -11,11 +11,71 @@ import io.github.edadma.libcairo.extern.LibCairo.cairo_font_face_tp
 implicit class Surface(val surface: lib.cairo_surface_tp):
   def create: Context = lib.cairo_create(surface)
   def destroy(): Unit = lib.cairo_surface_destroy(surface)
-  def writeToPNG(filename: String): lib.cairo_status_t =
-    Zone { lib.cairo_surface_write_to_png(surface, toCString(filename)) }
-  def showPage(): Unit   = lib.cairo_surface_show_page(surface)
-  def getWidth: Int      = lib.cairo_image_surface_get_width(surface)
-  def getHeight: Int     = lib.cairo_image_surface_get_height(surface)
+  def writeToPNG(filename: String): Status =
+    Zone { new Status(lib.cairo_surface_write_to_png(surface, toCString(filename))) }
+
+  /** Encode the surface as a PNG in memory, with no temp file. */
+  def writeToPNGBytes: Array[Byte] = PngStream.synchronized {
+    PngStream.writeBuffer = new scala.collection.mutable.ArrayBuffer[Byte]
+    lib.cairo_surface_write_to_png_stream(surface, PngStream.writeFunc, null)
+    val result = PngStream.writeBuffer.toArray
+    PngStream.writeBuffer = null
+    result
+  }
+  def showPage(): Unit = lib.cairo_surface_show_page(surface)
+
+  /** Emit the current page like [[showPage]] but retain its content, so the next page starts
+    * as a copy of this one. Paginated (PDF/PS) surfaces only. */
+  def copyPage(): Unit = lib.cairo_surface_copy_page(surface)
+
+  /** The error state of the surface. Cairo constructors never return null — they return a
+    * surface in an error state — so check this after creating a surface from fallible input
+    * (a PNG file, for instance). */
+  def status: Status = new Status(lib.cairo_surface_status(surface))
+
+  /** Finish the surface: flush all drawing and drop external resources — for a PDF surface,
+    * write the trailer and close the file. The surface object survives (until [[destroy]])
+    * but no longer accepts drawing. */
+  def finish(): Unit = lib.cairo_surface_finish(surface)
+
+  def getType: SurfaceType   = new SurfaceType(lib.cairo_surface_get_type(surface))
+  def getContent: Content    = new Content(lib.cairo_surface_get_content(surface))
+  def getReferenceCount: Int = lib.cairo_surface_get_reference_count(surface).toInt
+
+  /** Create a surface compatible with this one (same backend) for drawing intermediate
+    * content — the right way to make an offscreen buffer that composites efficiently back
+    * onto this surface. */
+  def createSimilar(content: Content, width: Int, height: Int): Surface =
+    lib.cairo_surface_create_similar(surface, content.value, width, height)
+
+  /** Create an image surface optimal for uploading to this surface. */
+  def createSimilarImage(format: Format, width: Int, height: Int): Surface =
+    lib.cairo_surface_create_similar_image(surface, format.value, width, height)
+
+  def setDeviceOffset(xOffset: Double, yOffset: Double): Unit =
+    lib.cairo_surface_set_device_offset(surface, xOffset, yOffset)
+  def getDeviceOffset: (Double, Double) =
+    val x = stackalloc[CDouble]()
+    val y = stackalloc[CDouble]()
+
+    lib.cairo_surface_get_device_offset(surface, x, y)
+    (!x, !y)
+
+  /** Scale between user space and backend pixels — the surface-side mechanism for HiDPI
+    * rendering: a 2.0 scale draws everything at double resolution while user-space
+    * coordinates stay in logical units. */
+  def setDeviceScale(xScale: Double, yScale: Double): Unit =
+    lib.cairo_surface_set_device_scale(surface, xScale, yScale)
+  def getDeviceScale: (Double, Double) =
+    val x = stackalloc[CDouble]()
+    val y = stackalloc[CDouble]()
+
+    lib.cairo_surface_get_device_scale(surface, x, y)
+    (!x, !y)
+
+  def getWidth: Int   = lib.cairo_image_surface_get_width(surface)
+  def getHeight: Int  = lib.cairo_image_surface_get_height(surface)
+  def getFormat: Format = new Format(lib.cairo_image_surface_get_format(surface))
 
   /** A pointer to the surface's pixel buffer. For a [[Format.ARGB32]] surface each pixel
     * is a native-endian 32-bit `0xAARRGGBB` with premultiplied alpha, packed in rows of
@@ -42,7 +102,57 @@ implicit class Surface(val surface: lib.cairo_surface_tp):
     * surface again. */
   def markDirty(): Unit = lib.cairo_surface_mark_dirty(surface)
 
+  /** Like [[markDirty]] but limited to a rectangle (in surface coordinates) — cheaper when
+    * only part of the buffer was written. */
+  def markDirtyRectangle(x: Int, y: Int, width: Int, height: Int): Unit =
+    lib.cairo_surface_mark_dirty_rectangle(surface, x, y, width, height)
+
   def reference: Surface = lib.cairo_surface_reference(surface)
+
+  // PDF surfaces only — these are silent no-ops (or put the surface in an error state) on
+  // other surface types.
+
+  /** Restrict the generated PDF to a specific version of the PDF specification. Must be
+    * called before any drawing. */
+  def restrictToVersion(version: PdfVersion): Unit =
+    lib.cairo_pdf_surface_restrict_to_version(surface, version.value)
+
+  /** Change the page size, in points, for subsequent pages. Call before drawing anything on
+    * the new page. */
+  def setSize(widthInPoints: Double, heightInPoints: Double): Unit =
+    lib.cairo_pdf_surface_set_size(surface, widthInPoints, heightInPoints)
+
+  /** Add an item to the document's outline (the bookmark tree shown in a PDF viewer's
+    * sidebar). `parentId` is [[PdfOutline.ROOT]] for a top-level item or the id returned by a
+    * previous call for a nested one. `linkAttribs` takes the same attribute syntax as a
+    * [[Tags.LINK]] tag — e.g. `"dest='chapter1'"` or `"page=3 pos=[0 792]"` — and names where
+    * the item jumps to. Returns the id of the new item. */
+  def addOutline(parentId: Int, utf8: String, linkAttribs: String, flags: PdfOutlineFlags): Int = Zone {
+    lib.cairo_pdf_surface_add_outline(surface, parentId, toCString(utf8), toCString(linkAttribs), flags.value)
+  }
+
+  /** Set a standard document-information field ([[PdfMetadata.TITLE]], AUTHOR, …). Dates use
+    * ISO-8601: `2026-06-12T10:30:00Z`. */
+  def setMetadata(metadata: PdfMetadata, utf8: String): Unit = Zone {
+    lib.cairo_pdf_surface_set_metadata(surface, metadata.value, toCString(utf8))
+  }
+
+  /** Set an arbitrary named document-information field. */
+  def setCustomMetadata(name: String, value: String): Unit = Zone {
+    lib.cairo_pdf_surface_set_custom_metadata(surface, toCString(name), toCString(value))
+  }
+
+  /** Set the label the viewer displays for the current page — `"iv"`, `"Appendix A"` — in
+    * place of the plain page number. Applies to this page and those after it until set
+    * again. */
+  def setPageLabel(utf8: String): Unit = Zone {
+    lib.cairo_pdf_surface_set_page_label(surface, toCString(utf8))
+  }
+
+  /** Set the dimensions of the embedded thumbnail image generated for the current and
+    * subsequent pages; 0×0 (the default) emits no thumbnails. */
+  def setThumbnailSize(width: Int, height: Int): Unit =
+    lib.cairo_pdf_surface_set_thumbnail_size(surface, width, height)
 
 implicit class Context private[libcairo] (val cr: lib.cairo_tp) extends AnyVal:
   def reference: Context                           = lib.cairo_reference(cr)
@@ -178,6 +288,122 @@ implicit class Context private[libcairo] (val cr: lib.cairo_tp) extends AnyVal:
     lib.cairo_fill_extents(cr, x1, y1, x2, y2)
     (!x1, !y1, !x2, !y2)
   def newSubPath(): Unit = lib.cairo_new_sub_path(cr)
+
+  /** The error state of the context. Cairo never returns errors from drawing calls — an
+    * error makes the context inert and sticks until checked here. */
+  def status: Status = new Status(lib.cairo_status(cr))
+
+  def curveTo(x1: Double, y1: Double, x2: Double, y2: Double, x3: Double, y3: Double): Unit =
+    lib.cairo_curve_to(cr, x1, y1, x2, y2, x3, y3)
+  def hasCurrentPoint: Boolean = lib.cairo_has_current_point(cr) != 0
+  def getCurrentPoint: (Double, Double) =
+    val x = stackalloc[CDouble]()
+    val y = stackalloc[CDouble]()
+
+    lib.cairo_get_current_point(cr, x, y)
+    (!x, !y)
+
+  def setFillRule(fillRule: FillRule): Unit   = lib.cairo_set_fill_rule(cr, fillRule.value)
+  def getFillRule: FillRule                   = new FillRule(lib.cairo_get_fill_rule(cr))
+  def setAntialias(antialias: Antialias): Unit = lib.cairo_set_antialias(cr, antialias.value)
+  def getAntialias: Antialias                 = new Antialias(lib.cairo_get_antialias(cr))
+  def setMiterLimit(limit: Double): Unit      = lib.cairo_set_miter_limit(cr, limit)
+  def getMiterLimit: Double                   = lib.cairo_get_miter_limit(cr)
+  def getLineWidth: Double                    = lib.cairo_get_line_width(cr)
+  def getLineCap: LineCap                     = new LineCap(lib.cairo_get_line_cap(cr))
+  def getLineJoin: LineJoin                   = new LineJoin(lib.cairo_get_line_join(cr))
+  def getOperator: Operator                   = new Operator(lib.cairo_get_operator(cr))
+  def getTolerance: Double                    = lib.cairo_get_tolerance(cr)
+  def getSource: Pattern                      = lib.cairo_get_source(cr)
+  def getTarget: Surface                      = lib.cairo_get_target(cr)
+  def getGroupTarget: Surface                 = lib.cairo_get_group_target(cr)
+
+  def clipPreserve(): Unit = lib.cairo_clip_preserve(cr)
+  def clipExtents: (Double, Double, Double, Double) =
+    val x1 = stackalloc[CDouble]()
+    val y1 = stackalloc[CDouble]()
+    val x2 = stackalloc[CDouble]()
+    val y2 = stackalloc[CDouble]()
+
+    lib.cairo_clip_extents(cr, x1, y1, x2, y2)
+    (!x1, !y1, !x2, !y2)
+  def inClip(x: Double, y: Double): Boolean   = lib.cairo_in_clip(cr, x, y) != 0
+  def inFill(x: Double, y: Double): Boolean   = lib.cairo_in_fill(cr, x, y) != 0
+  def inStroke(x: Double, y: Double): Boolean = lib.cairo_in_stroke(cr, x, y) != 0
+
+  def transform(matrix: Matrix): Unit = lib.cairo_transform(cr, matrix.matrix)
+  def setMatrix(matrix: Matrix): Unit = lib.cairo_set_matrix(cr, matrix.matrix)
+  def getMatrix(matrix: Matrix): Unit = lib.cairo_get_matrix(cr, matrix.matrix)
+  def userToDevice(x: Double, y: Double): (Double, Double) =
+    val xp = stackalloc[CDouble]()
+    val yp = stackalloc[CDouble]()
+
+    !xp = x
+    !yp = y
+    lib.cairo_user_to_device(cr, xp, yp)
+    (!xp, !yp)
+  def userToDeviceDistance(dx: Double, dy: Double): (Double, Double) =
+    val dxp = stackalloc[CDouble]()
+    val dyp = stackalloc[CDouble]()
+
+    !dxp = dx
+    !dyp = dy
+    lib.cairo_user_to_device_distance(cr, dxp, dyp)
+    (!dxp, !dyp)
+
+  /** Emit the current page like [[showPage]] but retain its content, so the next page starts
+    * as a copy of this one. Paginated (PDF/PS) surfaces only. */
+  def copyPage(): Unit = lib.cairo_copy_page(cr)
+
+  /** Draw glyphs by font glyph index at exact positions — the low-level text path a
+    * typesetter or shaping engine uses instead of [[showText]], which leaves glyph choice
+    * and placement to Cairo. Positions are in user space; on a PDF surface, pair with a
+    * surrounding [[tagBegin]] carrying ActualText when the glyphs don't map trivially back
+    * to the source text. */
+  def showGlyphs(glyphs: collection.Seq[Glyph]): Unit = withGlyphArray(glyphs) { (a, n) =>
+    lib.cairo_show_glyphs(cr, a, n)
+  }
+
+  /** Append the outlines of the glyphs to the current path, like [[textPath]] but
+    * index-addressed. */
+  def glyphPath(glyphs: collection.Seq[Glyph]): Unit = withGlyphArray(glyphs) { (a, n) =>
+    lib.cairo_glyph_path(cr, a, n)
+  }
+
+  def glyphExtents(glyphs: collection.Seq[Glyph]): TextExtents = withGlyphArray(glyphs) { (a, n) =>
+    val extents: TextExtentsOps = stackalloc[lib.cairo_text_extents_t]()
+
+    lib.cairo_glyph_extents(cr, a, n, extents.ptr)
+    TextExtents(extents.xBearing, extents.yBearing, extents.width, extents.height, extents.xAdvance, extents.yAdvance)
+  }
+
+  private def withGlyphArray[A](glyphs: collection.Seq[Glyph])(f: (lib.cairo_glyph_tp, Int) => A): A =
+    val a = lib.cairo_glyph_allocate(glyphs.length)
+
+    for (g, i) <- glyphs.zipWithIndex do
+      val p = a + i
+
+      p._1 = g.index.toUSize
+      p._2 = g.x
+      p._3 = g.y
+    try f(a, glyphs.length)
+    finally lib.cairo_glyph_free(a)
+
+  /** Open a structure element in the document's tag tree. On a PDF surface this produces
+    * tagged PDF: standard structure tags (`"Document"`, `"H1"`, `"P"`, …) give the document a
+    * logical reading order for accessibility, while [[Tags.LINK]] and [[Tags.DEST]] create
+    * hyperlinks and named destinations. `attributes` is a space-separated `key=value` list —
+    * strings in single quotes — e.g. `"uri='https://example.org'"` for a link or
+    * `"name='chapter1'"` for a destination. Every begin must be matched by a [[tagEnd]] with
+    * the same name, properly nested. */
+  def tagBegin(tagName: String, attributes: String): Unit = Zone {
+    lib.cairo_tag_begin(cr, toCString(tagName), toCString(attributes))
+  }
+
+  /** Close the innermost open structure element named `tagName`. */
+  def tagEnd(tagName: String): Unit = Zone {
+    lib.cairo_tag_end(cr, toCString(tagName))
+  }
 end Context
 
 implicit class FontOptions private[libcairo] (val ptr: lib.cairo_font_options_tp) extends AnyVal {}
@@ -219,14 +445,36 @@ implicit class FontExtentsOps(val ptr: lib.cairo_font_extents_tp) extends AnyVal
 
 case class FontExtents(ascent: Double, descent: Double, height: Double, maxXAdvance: Double, maxYAdvance: Double)
 
+/** One positioned glyph for [[Context.showGlyphs]]: `index` is the glyph index in the
+  * current font face (not a character code), and `(x, y)` places its origin in user space. */
+case class Glyph(index: Long, x: Double, y: Double)
+
 implicit class Pattern private[libcairo] (val pattern: lib.cairo_pattern_tp) extends AnyVal {
-  def destroy(): Unit = lib.cairo_destroy(pattern)
+  def destroy(): Unit = lib.cairo_pattern_destroy(pattern)
+
+  def reference: Pattern = lib.cairo_pattern_reference(pattern)
+
+  def status: Status = new Status(lib.cairo_pattern_status(pattern))
 
   def addColorStopRGB(offset: Double, red: Double, green: Double, blue: Double): Unit =
     lib.cairo_pattern_add_color_stop_rgb(pattern, offset, red, green, blue)
 
   def addColorStopRGBA(offset: Double, red: Double, green: Double, blue: Double, alpha: Double): Unit =
     lib.cairo_pattern_add_color_stop_rgba(pattern, offset, red, green, blue, alpha)
+
+  /** How the pattern paints outside its natural area — [[Extend.REPEAT]] tiles a surface
+    * pattern, [[Extend.PAD]] extends the edge colors of a gradient. */
+  def setExtend(extend: Extend): Unit = lib.cairo_pattern_set_extend(pattern, extend.value)
+  def getExtend: Extend               = new Extend(lib.cairo_pattern_get_extend(pattern))
+
+  def setFilter(filter: Filter): Unit = lib.cairo_pattern_set_filter(pattern, filter.value)
+  def getFilter: Filter               = new Filter(lib.cairo_pattern_get_filter(pattern))
+
+  /** The pattern's transformation maps user space to pattern space — it is the inverse of
+    * how the pattern appears on the page, so to draw a pattern scaled up 2x, set a matrix
+    * that scales by 0.5. */
+  def setMatrix(matrix: Matrix): Unit = lib.cairo_pattern_set_matrix(pattern, matrix.matrix)
+  def getMatrix(matrix: Matrix): Unit = lib.cairo_pattern_get_matrix(pattern, matrix.matrix)
 }
 
 implicit class Matrix private[libcairo] (val matrix: lib.cairo_matrix_tp) extends AnyVal {
@@ -292,8 +540,69 @@ def formatStrideForWidth(format: Format, width: Int): Int =
 def imageSurfaceCreateFromPNG(filename: String): Surface =
   Zone { lib.cairo_image_surface_create_from_png(toCString(filename)) }
 
+/** Decode a PNG held in memory into a new image surface — the counterpart of
+  * [[Surface.writeToPNGBytes]]. Check [[Surface.status]] on the result: malformed data
+  * yields a surface in an error state, not a null. */
+def imageSurfaceCreateFromPNGBytes(data: Array[Byte]): Surface = PngStream.synchronized {
+  PngStream.readData = data
+  PngStream.readPos = 0
+
+  val surface = lib.cairo_image_surface_create_from_png_stream(PngStream.readFunc, null)
+
+  PngStream.readData = null
+  surface
+}
+
+/** Shared state for the PNG stream callbacks. Cairo's stream functions take a C function
+  * pointer plus a closure pointer; a Scala function that captures can't become a C function
+  * pointer, so the buffers live here and the callbacks are static. Each PNG operation
+  * completes within a single (synchronized) call, so the state never outlives it. */
+private object PngStream {
+  var writeBuffer: scala.collection.mutable.ArrayBuffer[Byte] = null
+  var readData: Array[Byte]                                   = null
+  var readPos: Int                                            = 0
+
+  val writeFunc: lib.cairo_write_func_t =
+    CFuncPtr3.fromScalaFunction { (_: Ptr[Byte], data: Ptr[Byte], length: CUnsignedInt) =>
+      val n = length.toInt
+      var i = 0
+
+      while i < n do
+        writeBuffer += data(i)
+        i += 1
+      Status.SUCCESS.value
+    }
+
+  val readFunc: lib.cairo_read_func_t =
+    CFuncPtr3.fromScalaFunction { (_: Ptr[Byte], data: Ptr[Byte], length: CUnsignedInt) =>
+      val n = length.toInt
+
+      if readData == null || readPos + n > readData.length then Status.READ_ERROR.value
+      else
+        var i = 0
+
+        while i < n do
+          data(i) = readData(readPos + i)
+          i += 1
+        readPos += n
+        Status.SUCCESS.value
+    }
+}
+
 def pdfSurfaceCreate(filename: String, width_in_points: Double, height_in_points: Double): Surface =
   Zone { lib.cairo_pdf_surface_create(toCString(filename), width_in_points, height_in_points) }
+
+def patternCreateRGB(red: Double, green: Double, blue: Double): Pattern =
+  lib.cairo_pattern_create_rgb(red, green, blue)
+
+def patternCreateRGBA(red: Double, green: Double, blue: Double, alpha: Double): Pattern =
+  lib.cairo_pattern_create_rgba(red, green, blue, alpha)
+
+/** Create a pattern that paints with the contents of a surface — combine with
+  * [[Pattern.setExtend]] ([[Extend.REPEAT]]) for tiling and [[Pattern.setMatrix]] for
+  * placement and scaling. */
+def patternCreateForSurface(surface: Surface): Pattern =
+  lib.cairo_pattern_create_for_surface(surface.surface)
 
 def patternCreateLinear(x0: Double, y0: Double, x1: Double, y1: Double): Pattern =
   lib.cairo_pattern_create_linear(x0, y0, x1, y1)
@@ -310,7 +619,12 @@ def patternCreateRadial(
 
 // enums
 
-class Status(val value: CInt) extends AnyVal
+class Status(val value: CInt) extends AnyVal {
+  def isSuccess: Boolean = value == 0
+
+  /** Cairo's human-readable description of the status. */
+  def message: String = fromCString(lib.cairo_status_to_string(value))
+}
 
 object Status {
   final val SUCCESS                   = new Status(0)
@@ -596,6 +910,71 @@ object Filter {
   final val NEAREST  = new Filter(3)
   final val BILINEAR = new Filter(4)
   final val GAUSSIAN = new Filter(5)
+}
+
+/** The standard tag names from cairo.h for use with [[Context.tagBegin]] /
+  * [[Context.tagEnd]]. Any other name is treated as a PDF structure tag (`"Document"`,
+  * `"H1"`, `"P"`, `"Figure"`, …). (Named `Tags`, not `Tag`, to avoid clashing with
+  * `scala.scalanative.unsafe.Tag` when both packages are wildcard-imported.) */
+object Tags {
+
+  /** A named destination: `tagBegin(Tags.DEST, "name='chapter1'")`. Content is optional —
+    * an empty begin/end pair marks a point. */
+  final val DEST = "cairo.dest"
+
+  /** A hyperlink around the enclosed content. Attributes select the target:
+    * `"uri='https://...'"` for an external link, `"dest='name'"` for a named destination,
+    * or `"page=N pos=[x y]"` for a direct page location. */
+  final val LINK = "Link"
+
+  /** Marks content split across graphics-state boundaries as one logical element, with
+    * `id` linking the pieces. */
+  final val CONTENT = "cairo.content"
+
+  /** References a [[CONTENT]] element by `ref` attribute. */
+  final val CONTENT_REF = "cairo.content_ref"
+}
+
+class PdfVersion(val value: lib.cairo_pdf_version_t) extends AnyVal {
+
+  /** The version's display name, e.g. `"PDF 1.7"`. */
+  def string: String = fromCString(lib.cairo_pdf_version_to_string(value))
+}
+
+object PdfVersion {
+  final val V1_4 = new PdfVersion(0)
+  final val V1_5 = new PdfVersion(1)
+  final val V1_6 = new PdfVersion(2)
+  final val V1_7 = new PdfVersion(3)
+}
+
+class PdfMetadata(val value: lib.cairo_pdf_metadata_t) extends AnyVal
+
+object PdfMetadata {
+  final val TITLE       = new PdfMetadata(0)
+  final val AUTHOR      = new PdfMetadata(1)
+  final val SUBJECT     = new PdfMetadata(2)
+  final val KEYWORDS    = new PdfMetadata(3)
+  final val CREATOR     = new PdfMetadata(4)
+  final val CREATE_DATE = new PdfMetadata(5)
+  final val MOD_DATE    = new PdfMetadata(6)
+}
+
+class PdfOutlineFlags(val value: lib.cairo_pdf_outline_flags_t) extends AnyVal {
+  def |(that: PdfOutlineFlags): PdfOutlineFlags = new PdfOutlineFlags(value | that.value)
+}
+
+object PdfOutlineFlags {
+  final val NONE   = new PdfOutlineFlags(0)
+  final val OPEN   = new PdfOutlineFlags(0x1)
+  final val BOLD   = new PdfOutlineFlags(0x2)
+  final val ITALIC = new PdfOutlineFlags(0x4)
+}
+
+object PdfOutline {
+
+  /** The parent id that makes [[Surface.addOutline]] create a top-level outline item. */
+  final val ROOT = 0
 }
 
 class RegionOverlap(val value: CInt) extends AnyVal

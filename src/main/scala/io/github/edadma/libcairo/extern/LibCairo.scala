@@ -35,6 +35,14 @@ object LibCairo:
   type cairo_font_face_tp    = Ptr[cairo_font_face_t]
   type cairo_scaled_font_t   = CStruct0
   type cairo_scaled_font_tp  = Ptr[cairo_scaled_font_t]
+  type cairo_bool_t          = CInt
+  type cairo_glyph_t         = CStruct3[CUnsignedLong, CDouble, CDouble] // index, x, y
+  type cairo_glyph_tp        = Ptr[cairo_glyph_t]
+  type cairo_pdf_version_t   = CInt
+  type cairo_pdf_metadata_t  = CInt
+  type cairo_pdf_outline_flags_t = CInt
+  type cairo_write_func_t    = CFuncPtr3[Ptr[Byte], Ptr[Byte], CUnsignedInt, cairo_status_t] // closure, data, length
+  type cairo_read_func_t     = CFuncPtr3[Ptr[Byte], Ptr[Byte], CUnsignedInt, cairo_status_t] // closure, data, length
 
   def cairo_create(target: cairo_surface_tp): cairo_tp                            = extern // 491
   def cairo_reference(cr: cairo_tp): cairo_tp                                     = extern // 494
@@ -190,3 +198,152 @@ object LibCairo:
   def cairo_surface_flush(surface: cairo_surface_tp): Unit                 = extern
   def cairo_surface_mark_dirty(surface: cairo_surface_tp): Unit            = extern
   def cairo_surface_reference(surface: cairo_surface_tp): cairo_surface_tp = extern
+
+  // error handling
+  def cairo_status(cr: cairo_tp): cairo_status_t              = extern
+  def cairo_status_to_string(status: cairo_status_t): CString = extern
+
+  // paths
+  def cairo_curve_to(
+      cr: cairo_tp,
+      x1: CDouble,
+      y1: CDouble,
+      x2: CDouble,
+      y2: CDouble,
+      x3: CDouble,
+      y3: CDouble,
+  ): Unit = extern
+  def cairo_get_current_point(cr: cairo_tp, x: Ptr[CDouble], y: Ptr[CDouble]): Unit = extern
+  def cairo_has_current_point(cr: cairo_tp): cairo_bool_t                           = extern
+
+  // graphics state
+  def cairo_set_fill_rule(cr: cairo_tp, fill_rule: cairo_fill_rule_t): Unit = extern
+  def cairo_get_fill_rule(cr: cairo_tp): cairo_fill_rule_t                  = extern
+  def cairo_set_antialias(cr: cairo_tp, antialias: cairo_antialias_t): Unit = extern
+  def cairo_get_antialias(cr: cairo_tp): cairo_antialias_t                  = extern
+  def cairo_set_miter_limit(cr: cairo_tp, limit: CDouble): Unit             = extern
+  def cairo_get_miter_limit(cr: cairo_tp): CDouble                          = extern
+  def cairo_get_line_width(cr: cairo_tp): CDouble                           = extern
+  def cairo_get_line_cap(cr: cairo_tp): cairo_line_cap_t                    = extern
+  def cairo_get_line_join(cr: cairo_tp): cairo_line_join_t                  = extern
+  def cairo_get_operator(cr: cairo_tp): cairo_operator_t                    = extern
+  def cairo_get_tolerance(cr: cairo_tp): CDouble                            = extern
+  def cairo_get_source(cr: cairo_tp): cairo_pattern_tp                      = extern
+  def cairo_get_target(cr: cairo_tp): cairo_surface_tp                      = extern
+  def cairo_get_group_target(cr: cairo_tp): cairo_surface_tp                = extern
+
+  // clipping and hit testing
+  def cairo_clip_preserve(cr: cairo_tp): Unit = extern
+  def cairo_clip_extents(cr: cairo_tp, x1: Ptr[CDouble], y1: Ptr[CDouble], x2: Ptr[CDouble], y2: Ptr[CDouble]): Unit =
+    extern
+  def cairo_in_clip(cr: cairo_tp, x: CDouble, y: CDouble): cairo_bool_t   = extern
+  def cairo_in_fill(cr: cairo_tp, x: CDouble, y: CDouble): cairo_bool_t   = extern
+  def cairo_in_stroke(cr: cairo_tp, x: CDouble, y: CDouble): cairo_bool_t = extern
+
+  // transformations
+  def cairo_transform(cr: cairo_tp, matrix: cairo_matrix_tp): Unit                          = extern
+  def cairo_set_matrix(cr: cairo_tp, matrix: cairo_matrix_tp): Unit                         = extern
+  def cairo_get_matrix(cr: cairo_tp, matrix: cairo_matrix_tp): Unit                         = extern
+  def cairo_user_to_device(cr: cairo_tp, x: Ptr[CDouble], y: Ptr[CDouble]): Unit            = extern
+  def cairo_user_to_device_distance(cr: cairo_tp, dx: Ptr[CDouble], dy: Ptr[CDouble]): Unit = extern
+
+  // pages
+  def cairo_copy_page(cr: cairo_tp): Unit                       = extern
+  def cairo_surface_copy_page(surface: cairo_surface_tp): Unit  = extern
+
+  // glyphs
+  def cairo_glyph_allocate(num_glyphs: CInt): cairo_glyph_tp                          = extern
+  def cairo_glyph_free(glyphs: cairo_glyph_tp): Unit                                  = extern
+  def cairo_show_glyphs(cr: cairo_tp, glyphs: cairo_glyph_tp, num_glyphs: CInt): Unit = extern
+  def cairo_glyph_path(cr: cairo_tp, glyphs: cairo_glyph_tp, num_glyphs: CInt): Unit  = extern
+  def cairo_glyph_extents(
+      cr: cairo_tp,
+      glyphs: cairo_glyph_tp,
+      num_glyphs: CInt,
+      extents: cairo_text_extents_tp,
+  ): Unit = extern
+
+  // tagged structure (PDF logical structure, links, destinations)
+  def cairo_tag_begin(cr: cairo_tp, tag_name: CString, attributes: CString): Unit = extern
+  def cairo_tag_end(cr: cairo_tp, tag_name: CString): Unit                        = extern
+
+  // surfaces
+  def cairo_surface_status(surface: cairo_surface_tp): cairo_status_t            = extern
+  def cairo_surface_finish(surface: cairo_surface_tp): Unit                      = extern
+  def cairo_surface_get_type(surface: cairo_surface_tp): CInt                    = extern
+  def cairo_surface_get_content(surface: cairo_surface_tp): cairo_content_t      = extern
+  def cairo_surface_get_reference_count(surface: cairo_surface_tp): CUnsignedInt = extern
+  def cairo_surface_mark_dirty_rectangle(
+      surface: cairo_surface_tp,
+      x: CInt,
+      y: CInt,
+      width: CInt,
+      height: CInt,
+  ): Unit = extern
+  def cairo_surface_create_similar(
+      other: cairo_surface_tp,
+      content: cairo_content_t,
+      width: CInt,
+      height: CInt,
+  ): cairo_surface_tp = extern
+  def cairo_surface_create_similar_image(
+      other: cairo_surface_tp,
+      format: cairo_format_t,
+      width: CInt,
+      height: CInt,
+  ): cairo_surface_tp = extern
+  def cairo_surface_set_device_offset(surface: cairo_surface_tp, x_offset: CDouble, y_offset: CDouble): Unit = extern
+  def cairo_surface_get_device_offset(surface: cairo_surface_tp, x_offset: Ptr[CDouble], y_offset: Ptr[CDouble]): Unit =
+    extern
+  def cairo_surface_set_device_scale(surface: cairo_surface_tp, x_scale: CDouble, y_scale: CDouble): Unit = extern
+  def cairo_surface_get_device_scale(surface: cairo_surface_tp, x_scale: Ptr[CDouble], y_scale: Ptr[CDouble]): Unit =
+    extern
+  def cairo_image_surface_get_format(surface: cairo_surface_tp): cairo_format_t = extern
+
+  // PNG streams (in-memory encode/decode)
+  def cairo_surface_write_to_png_stream(
+      surface: cairo_surface_tp,
+      write_func: cairo_write_func_t,
+      closure: Ptr[Byte],
+  ): cairo_status_t = extern
+  def cairo_image_surface_create_from_png_stream(
+      read_func: cairo_read_func_t,
+      closure: Ptr[Byte],
+  ): cairo_surface_tp = extern
+
+  // patterns
+  def cairo_pattern_create_rgb(red: CDouble, green: CDouble, blue: CDouble): cairo_pattern_tp = extern
+  def cairo_pattern_create_rgba(red: CDouble, green: CDouble, blue: CDouble, alpha: CDouble): cairo_pattern_tp = extern
+  def cairo_pattern_create_for_surface(surface: cairo_surface_tp): cairo_pattern_tp = extern
+  def cairo_pattern_reference(pattern: cairo_pattern_tp): cairo_pattern_tp          = extern
+  def cairo_pattern_status(pattern: cairo_pattern_tp): cairo_status_t               = extern
+  def cairo_pattern_set_extend(pattern: cairo_pattern_tp, extend: CInt): Unit       = extern
+  def cairo_pattern_get_extend(pattern: cairo_pattern_tp): CInt                     = extern
+  def cairo_pattern_set_filter(pattern: cairo_pattern_tp, filter: CInt): Unit       = extern
+  def cairo_pattern_get_filter(pattern: cairo_pattern_tp): CInt                     = extern
+  def cairo_pattern_set_matrix(pattern: cairo_pattern_tp, matrix: cairo_matrix_tp): Unit = extern
+  def cairo_pattern_get_matrix(pattern: cairo_pattern_tp, matrix: cairo_matrix_tp): Unit = extern
+
+  // PDF surfaces (cairo-pdf.h)
+  def cairo_pdf_surface_restrict_to_version(surface: cairo_surface_tp, version: cairo_pdf_version_t): Unit = extern
+  def cairo_pdf_version_to_string(version: cairo_pdf_version_t): CString                                   = extern
+  def cairo_pdf_surface_set_size(
+      surface: cairo_surface_tp,
+      width_in_points: CDouble,
+      height_in_points: CDouble,
+  ): Unit = extern
+  def cairo_pdf_surface_add_outline(
+      surface: cairo_surface_tp,
+      parent_id: CInt,
+      utf8: CString,
+      link_attribs: CString,
+      flags: cairo_pdf_outline_flags_t,
+  ): CInt = extern
+  def cairo_pdf_surface_set_metadata(
+      surface: cairo_surface_tp,
+      metadata: cairo_pdf_metadata_t,
+      utf8: CString,
+  ): Unit = extern
+  def cairo_pdf_surface_set_custom_metadata(surface: cairo_surface_tp, name: CString, value: CString): Unit = extern
+  def cairo_pdf_surface_set_page_label(surface: cairo_surface_tp, utf8: CString): Unit                      = extern
+  def cairo_pdf_surface_set_thumbnail_size(surface: cairo_surface_tp, width: CInt, height: CInt): Unit      = extern

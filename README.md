@@ -43,7 +43,7 @@ addSbtPlugin("org.scala-native" % "sbt-scala-native" % "0.5.12")
 Add the dependency in `build.sbt`:
 
 ```sbt
-libraryDependencies += "io.github.edadma" %%% "libcairo" % "0.0.6"
+libraryDependencies += "io.github.edadma" %%% "libcairo" % "0.0.7"
 ```
 
 Then import the facade:
@@ -259,6 +259,63 @@ import io.github.edadma.libcairo._
   surface.writeToPNG("textextents.png")
   cr.destroy()
   surface.destroy()
+```
+
+### Example 5 — Tagged PDF
+
+This example creates a two-page PDF with document metadata, logical structure (for
+accessibility), a named destination, live hyperlinks, an outline (the viewer's bookmark
+sidebar), and page labels:
+
+```scala
+import io.github.edadma.libcairo._
+
+@main def run(): Unit =
+  val pdf = pdfSurfaceCreate("tagged.pdf", 612, 792)
+
+  pdf.setMetadata(PdfMetadata.TITLE, "Tagged-PDF demo")
+  pdf.setMetadata(PdfMetadata.AUTHOR, "Me")
+
+  val cr = pdf.create
+
+  cr.tagBegin("Document", "")
+
+  // Page 1 — a named destination, a heading, and an external link.
+  pdf.setPageLabel("Cover")
+  cr.tagBegin(Tags.DEST, "name='top' x=72 y=72")
+  cr.tagEnd(Tags.DEST)
+
+  cr.tagBegin("H1", "")
+  cr.selectFontFace("Georgia", FontSlant.NORMAL, FontWeight.BOLD)
+  cr.setFontSize(24)
+  cr.moveTo(72, 100)
+  cr.showText("Tagged PDF from Scala Native")
+  cr.tagEnd("H1")
+
+  cr.tagBegin(Tags.LINK, "uri='https://github.com/edadma/libcairo'")
+  cr.setSourceRGB(0, 0, 0.8)
+  cr.setFontSize(12)
+  cr.moveTo(72, 140)
+  cr.showText("github.com/edadma/libcairo")
+  cr.tagEnd(Tags.LINK)
+
+  cr.showPage()
+
+  // Page 2 — an internal link back to the destination on the cover.
+  pdf.setPageLabel("1")
+  cr.tagBegin(Tags.LINK, "dest='top'")
+  cr.setSourceRGB(0, 0, 0.8)
+  cr.moveTo(72, 100)
+  cr.showText("Back to the top")
+  cr.tagEnd(Tags.LINK)
+
+  cr.tagEnd("Document")
+
+  pdf.addOutline(PdfOutline.ROOT, "Cover", "dest='top'", PdfOutlineFlags.OPEN | PdfOutlineFlags.BOLD)
+
+  cr.destroy()
+  pdf.finish()
+  pdf.destroy()
 ```
 
 Documentation
