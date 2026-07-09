@@ -1,0 +1,2 @@
+-Dsun.net.client.defaultConnectTimeout=120000
+-Dsun.net.client.defaultReadTimeout=1800000
