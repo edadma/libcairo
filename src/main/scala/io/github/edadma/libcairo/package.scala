@@ -406,7 +406,15 @@ implicit class Context private[libcairo] (val cr: lib.cairo_tp) extends AnyVal:
   }
 end Context
 
-implicit class FontOptions private[libcairo] (val ptr: lib.cairo_font_options_tp) extends AnyVal {}
+implicit class FontOptions private[libcairo] (val ptr: lib.cairo_font_options_tp) extends AnyVal {
+  def setHintMetrics(hintMetrics: HintMetrics): Unit = lib.cairo_font_options_set_hint_metrics(ptr, hintMetrics.value)
+
+  def destroy(): Unit = lib.cairo_font_options_destroy(ptr)
+}
+
+/** Allocate a fresh, default font-options object. The caller owns it and must [[FontOptions.destroy]] it (or
+  * apply it to a context with [[Context.setFontOptions]], which copies the options in). */
+def fontOptionsCreate: FontOptions = lib.cairo_font_options_create()
 
 implicit class TextExtentsOps(val ptr: lib.cairo_text_extents_tp) extends AnyVal {
   def xBearing: Double = ptr._1
