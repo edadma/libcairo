@@ -16,6 +16,8 @@ object LibCairo:
   type cairo_font_slant_t    = CInt
   type cairo_font_weight_t   = CInt
   type cairo_hint_metrics_t  = CInt
+  type cairo_hint_style_t    = CInt
+  type cairo_subpixel_order_t = CInt
   type cairo_text_extents_t  = CStruct6[CDouble, CDouble, CDouble, CDouble, CDouble, CDouble]
   type cairo_text_extents_tp = Ptr[cairo_text_extents_t]
   type cairo_font_extents_t  = CStruct5[CDouble, CDouble, CDouble, CDouble, CDouble]
@@ -120,6 +122,18 @@ object LibCairo:
   def cairo_font_options_create(): cairo_font_options_tp                                                = extern // 1471
   def cairo_font_options_destroy(options: cairo_font_options_tp): Unit                                  = extern // 1490
   def cairo_font_options_set_hint_metrics(options: cairo_font_options_tp, hint_metrics: cairo_hint_metrics_t): Unit = extern // 1505
+  def cairo_font_options_get_hint_metrics(options: cairo_font_options_tp): cairo_hint_metrics_t       = extern // 1510
+  def cairo_font_options_set_hint_style(options: cairo_font_options_tp, hint_style: cairo_hint_style_t): Unit = extern // 1521
+  def cairo_font_options_get_hint_style(options: cairo_font_options_tp): cairo_hint_style_t           = extern // 1526
+  def cairo_font_options_set_antialias(options: cairo_font_options_tp, antialias: cairo_antialias_t): Unit = extern // 1553
+  def cairo_font_options_get_antialias(options: cairo_font_options_tp): cairo_antialias_t             = extern // 1558
+  def cairo_font_options_set_subpixel_order(options: cairo_font_options_tp, subpixel_order: cairo_subpixel_order_t): Unit = extern // 1537
+  def cairo_font_options_get_subpixel_order(options: cairo_font_options_tp): cairo_subpixel_order_t   = extern // 1542
+  def cairo_font_options_copy(original: cairo_font_options_tp): cairo_font_options_tp                 = extern // 1476
+  def cairo_font_options_status(options: cairo_font_options_tp): cairo_status_t                       = extern // 1495
+  def cairo_font_options_merge(options: cairo_font_options_tp, other: cairo_font_options_tp): Unit    = extern // 1481
+  def cairo_font_options_equal(options: cairo_font_options_tp, other: cairo_font_options_tp): cairo_bool_t = extern // 1500
+  def cairo_font_options_hash(options: cairo_font_options_tp): CUnsignedLong                          = extern // 1516
   def cairo_show_text(cr: cairo_tp, utf8: CString): Unit                                                = extern // 1482
   def cairo_text_path(cr: cairo_tp, utf8: CString): Unit                                                = extern // 1498
   def cairo_text_extents(cr: cairo_tp, utf8: CString, extents: cairo_text_extents_tp): Unit             = extern // 1504

@@ -408,6 +408,28 @@ end Context
 
 implicit class FontOptions private[libcairo] (val ptr: lib.cairo_font_options_tp) extends AnyVal {
   def setHintMetrics(hintMetrics: HintMetrics): Unit = lib.cairo_font_options_set_hint_metrics(ptr, hintMetrics.value)
+  def getHintMetrics: HintMetrics                    = new HintMetrics(lib.cairo_font_options_get_hint_metrics(ptr))
+
+  def setHintStyle(hintStyle: HintStyle): Unit = lib.cairo_font_options_set_hint_style(ptr, hintStyle.value)
+  def getHintStyle: HintStyle                  = new HintStyle(lib.cairo_font_options_get_hint_style(ptr))
+
+  def setAntialias(antialias: Antialias): Unit = lib.cairo_font_options_set_antialias(ptr, antialias.value)
+  def getAntialias: Antialias                  = new Antialias(lib.cairo_font_options_get_antialias(ptr))
+
+  def setSubpixelOrder(order: SubpixelOrder): Unit = lib.cairo_font_options_set_subpixel_order(ptr, order.value)
+  def getSubpixelOrder: SubpixelOrder              = new SubpixelOrder(lib.cairo_font_options_get_subpixel_order(ptr))
+
+  /** A deep copy the caller owns and must [[FontOptions.destroy]]. */
+  def copy: FontOptions = lib.cairo_font_options_copy(ptr)
+
+  /** `Status.SUCCESS` unless the object ran out of memory. */
+  def status: Status = new Status(lib.cairo_font_options_status(ptr))
+
+  /** Fold `other`'s non-default settings into this object (cairo's `cairo_font_options_merge`). */
+  def merge(other: FontOptions): Unit = lib.cairo_font_options_merge(ptr, other.ptr)
+
+  def equal(other: FontOptions): Boolean = lib.cairo_font_options_equal(ptr, other.ptr) != 0
+  def hash: Long                         = lib.cairo_font_options_hash(ptr).toLong
 
   def destroy(): Unit = lib.cairo_font_options_destroy(ptr)
 }
